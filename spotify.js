@@ -26,4 +26,37 @@ async function getToken(){
     return token
 }
 
-module.exports = { getToken }
+async function searchSong(songName, artistName) {
+    const token = await getToken()
+    const q = `track:${songName} artist:${artistName}`
+
+    const response = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track&limit=10`,
+        {
+            headers: {
+                Authorization: 'Bearer ' + token
+            }
+        }
+    )
+
+    return await response.json()
+}
+
+async function getArtist(artistId) {
+    const token = await getToken()
+
+    const response = await fetch(
+        `https://api.spotify.com/v1/artists/${artistId}`,
+        {
+            headers: {
+                Authorization: 'Bearer ' + token
+            }
+        }
+    )
+
+    return await response.json()
+}
+
+
+
+module.exports = { getToken, searchSong, getArtist }
