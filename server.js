@@ -24,11 +24,10 @@ app.get('/search', async (req, res) => {
     const track = data.tracks.items[0]
     const artistId = track.artists[0].id
     const artistData = await getArtist(artistId)
+    console.log(track.name)
     console.log(artistData)
     console.log(track.popularity)
     console.log(artistData.genres)
-
-
 
     res.json({
         song: track.name,
