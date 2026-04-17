@@ -6,6 +6,7 @@ require('dotenv').config()
 async function getToken(){
     // Buffer is a built-in Node tool for handling raw binary data.
     // converts it into Base64 — a format that's safe to send over the internet.
+    
     const credentials = Buffer.from(
         process.env.SPOTIFY_CLIENT_ID + ":" + process.env.SPOTIFY_CLIENT_SECRET
     ).toString('base64')
