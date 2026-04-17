@@ -3,10 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
     <title>Mixroot</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
 </head>
 <body>
-    
+    <div class="page">
+        <h1>Mixroot</h1>
+        <p class="subtitle">Find your song</p>
+
+        <div class="search-box">
+            <input type="text" id="songInput" placeholder="Enter song name">
+            <input type="text" id="artistInput" placeholder="Enter artist name">
+            <button onclick="searchSong()">Search</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
 </body>
 </html>
