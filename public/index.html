@@ -1,21 +1,188 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="night">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mixroot</title>
-    <!-- <script src="app.js" defer></script> -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
 </head>
-<body class="min-h-screen bg-gray-900 text-white">
-    <div class="page">
-        <h1>Mixroot</h1><img>
-        <div class="deck">
-            <div class="leftDeck"></div>
-            <div class="rightDeck"></div>
-        </div>
-        <div class="controls"></div>
-    </div>
+<body class="h-screen overflow-hidden bg-[#090806] text-white flex flex-col">
+
+    <!-- ════ HEADER ════ -->
+    <header class="controller-header shrink-0 flex items-center justify-between px-8 py-2.5 border-b border-white/[0.05]">
+        <span class="wordmark">Mixroot</span>
+        <p class="text-[9px] font-semibold uppercase tracking-[0.25em] text-[#48443c]">DJ Song Matcher</p>
+    </header>
+
+    <!-- ════ CONTROLLER BODY ════ -->
+    <main class="flex-1 flex overflow-hidden min-h-0">
+
+        <!-- ══ LEFT DECK ══ -->
+        <section class="deck-panel flex-1 flex flex-col items-center gap-3 px-5 py-4 border-r border-white/[0.04]">
+
+            <div class="flex items-center gap-2 self-start">
+                <div class="deck-dot"></div>
+                <span class="deck-label-text">Deck A</span>
+            </div>
+
+            <!-- Platter -->
+            <div class="platter-wrap relative flex items-center justify-center shrink-0">
+                <div class="platter-glow-ring"></div>
+                <div class="platter-platform">
+                    <div id="recordA" class="vinyl record-spin">
+                        <div class="vinyl-label vinyl-label-a">
+                            <span class="vinyl-letter">A</span>
+                        </div>
+                        <div class="vinyl-spindle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search inputs -->
+            <div class="flex gap-2 w-full">
+                <input id="songInput" type="text" placeholder="Song…"
+                    class="search-input flex-1 min-w-0">
+                <input id="artistInput" type="text" placeholder="Artist…"
+                    class="search-input flex-1 min-w-0">
+                <button onclick="searchSong()" class="search-btn">Search</button>
+            </div>
+
+            <!-- Song info — populated by JS -->
+            <div id="result" class="w-full flex-1 min-h-0">
+                <div class="info-empty h-full">
+                    <p class="info-empty-text">Search for a song to load Deck A</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ══ MIXER CENTER ══ -->
+        <section class="mixer-panel w-44 shrink-0 flex flex-col items-center gap-5 py-5 px-4">
+
+            <span class="mixer-label">Mixer</span>
+
+            <!-- Hairline -->
+            <div class="w-full h-px bg-white/[0.05]"></div>
+
+            <!-- Genre knob -->
+            <div class="knob-group">
+                <div id="genreKnob" class="mixer-knob">
+                    <div class="knob-notch"></div>
+                </div>
+                <p class="knob-title">Genre</p>
+                <p id="genreLabel" class="knob-value">All Genres</p>
+                <!-- Hidden select kept for JS compatibility -->
+                <select id="genreFilter" class="hidden">
+                    <option value="">All Genres</option>
+                    <option>Electronic</option>
+                    <option>Hip-Hop</option>
+                    <option>Pop</option>
+                    <option>R&amp;B</option>
+                    <option>House</option>
+                    <option>Techno</option>
+                    <option>Latin</option>
+                    <option>Ambient</option>
+                </select>
+            </div>
+
+            <!-- Hairline -->
+            <div class="w-full h-px bg-white/[0.05]"></div>
+
+            <!-- BPM fader -->
+            <div class="w-full flex flex-col items-center gap-2">
+                <div class="flex justify-between w-full">
+                    <span class="fader-edge-label">60</span>
+                    <span class="fader-center-label">
+                        <span id="bpmValue">140</span><span class="fader-unit"> BPM</span>
+                    </span>
+                    <span class="fader-edge-label">220</span>
+                </div>
+                <input id="bpmRange" type="range" min="60" max="220" value="140" class="bpm-fader w-full">
+                <p class="knob-title">BPM Range</p>
+            </div>
+
+            <!-- Hairline -->
+            <div class="w-full h-px bg-white/[0.05]"></div>
+
+            <!-- Sort knob -->
+            <div class="knob-group">
+                <div id="sortKnob" class="mixer-knob">
+                    <div class="knob-notch"></div>
+                </div>
+                <p class="knob-title">Sort By</p>
+                <p id="sortLabel" class="knob-value">BPM Match</p>
+                <!-- Hidden select kept for JS compatibility -->
+                <select id="sortBy" class="hidden">
+                    <option>BPM Match</option>
+                    <option>Key Match</option>
+                    <option>Popularity</option>
+                    <option>Energy</option>
+                    <option>Genre</option>
+                </select>
+            </div>
+
+            <!-- Hairline -->
+            <div class="w-full h-px bg-white/[0.05]"></div>
+
+            <!-- Crossfader -->
+            <div class="w-full flex flex-col items-center gap-2 mt-auto">
+                <p class="knob-title">Crossfader</p>
+                <div class="crossfader-track">
+                    <div class="crossfader-cap"></div>
+                </div>
+                <div class="flex justify-between w-full px-1">
+                    <span class="text-[8px] font-bold text-[#5a5248]">A</span>
+                    <span class="text-[8px] font-bold text-[#5a5248]">B</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ══ RIGHT DECK ══ -->
+        <section class="deck-panel flex-1 flex flex-col items-center gap-3 px-5 py-4 border-l border-white/[0.04]">
+
+            <div class="flex items-center gap-2 self-start">
+                <div class="deck-dot"></div>
+                <span class="deck-label-text">Deck B</span>
+            </div>
+
+            <!-- Platter -->
+            <div class="platter-wrap relative flex items-center justify-center shrink-0">
+                <div class="platter-glow-ring"></div>
+                <div class="platter-platform platter-platform-right">
+                    <div id="recordB" class="vinyl record-spin-reverse">
+                        <div class="vinyl-label vinyl-label-b">
+                            <span class="vinyl-letter">B</span>
+                        </div>
+                        <div class="vinyl-spindle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Match count -->
+            <div class="flex items-center justify-between w-full px-1">
+                <span class="deck-label-text">Matches</span>
+                <span id="matchCount" class="text-[9px] font-semibold text-[#8a7a60] tracking-wider"></span>
+            </div>
+
+            <!-- Recommendations — populated by JS, empty by default -->
+            <div id="recommendations" class="w-full flex-1 min-h-0">
+                <div class="info-empty h-full">
+                    <svg class="w-5 h-5 text-[#332f28] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                    </svg>
+                    <p class="info-empty-text">Find a song to see matches</p>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
 </body>
 </html>
