@@ -3,7 +3,7 @@ require('dotenv').config()
 
 // async means that we can use await
 // Create function to get the token
-async function getToken(){
+async function getTokenSpotify(){
     // Buffer is a built-in Node tool for handling raw binary data.
     // converts it into Base64 — a format that's safe to send over the internet.
     
@@ -28,7 +28,7 @@ async function getToken(){
 }
 
 async function searchSong(songName, artistName) {
-    const token = await getToken()
+    const token = await getTokenSpotify()
     const q = `track:${songName} artist:${artistName}`
 
     const response = await fetch(
@@ -44,7 +44,7 @@ async function searchSong(songName, artistName) {
 }
 
 async function getArtist(artistId) {
-    const token = await getToken()
+    const token = await getTokenSpotify()
 
     const response = await fetch(
         `https://api.spotify.com/v1/artists/${artistId}`,
@@ -60,4 +60,4 @@ async function getArtist(artistId) {
 
 
 
-module.exports = { getToken, searchSong, getArtist }
+module.exports = { getTokenSpotify, searchSong, getArtist }

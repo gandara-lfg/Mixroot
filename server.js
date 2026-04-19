@@ -6,6 +6,14 @@ app.use(express.static('public'))
 app.use(express.json())
 
 const { searchSong, getArtist } = require('./spotify')
+const { getSongBySpotifyId } = require('./soundcharts')
+
+const KEY_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+
+function formatKey(keyNum, mode) {
+    if (keyNum == null || keyNum < 0) return null
+    return KEY_NAMES[keyNum] + (mode === 0 ? 'm' : '')
+}
 
 app.get('/search', async (req, res) => {
     const song = req.query.song
@@ -16,18 +24,23 @@ app.get('/search', async (req, res) => {
     }
 
     const data = await searchSong(song, artist)
-    
+
     if (!data.tracks || data.tracks.items.length === 0){
         return res.json({ error: 'Song not found'})
     }
 
     const track = data.tracks.items[0]
     const artistId = track.artists[0].id
-    const artistData = await getArtist(artistId)
-    console.log(track.name)
-    console.log(artistData)
-    console.log(track.popularity)
-    console.log(artistData.genres)
+    const [artistData, soundchartsData] = await Promise.all([
+        getArtist(artistId),
+        getSongBySpotifyId(track.id)
+    ])
+
+    const audio = soundchartsData?.object?.audio
+    const scGenres = soundchartsData?.object?.genres
+    const genre = scGenres?.length ? scGenres[0].root : null
+
+    console.log(track.name, '| key:', audio?.key, audio?.mode, '| tempo:', audio?.tempo, '| genre:', genre)
 
     res.json({
         song: track.name,
@@ -36,7 +49,9 @@ app.get('/search', async (req, res) => {
         popularity: track.popularity,
         image: track.album.images[0]?.url,
         spotifyUrl: track.external_urls.spotify,
-        genres: artistData.genres || []
+        key: formatKey(audio?.key, audio?.mode),
+        bpm: audio?.tempo ? Math.round(audio.tempo) : null,
+        genre
     })
 })
 
