@@ -95,11 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
 
     const sortOptions = [
-        { label: 'BPM Match',   value: 'BPM Match' },
         { label: 'Key Match',   value: 'Key Match' },
-        { label: 'Popularity',  value: 'Popularity' },
-        { label: 'Energy',      value: 'Energy' },
-        { label: 'Genre',       value: 'Genre' },
     ]
 
     initDragKnob('genreKnob', genreOptions, 'genreFilter', 'genreLabel')
