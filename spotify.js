@@ -58,6 +58,4 @@ async function getArtist(artistId) {
     return await response.json()
 }
 
-
-
 module.exports = { getTokenSpotify, searchSong, getArtist }

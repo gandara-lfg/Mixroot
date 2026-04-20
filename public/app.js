@@ -183,7 +183,7 @@ function renderRecommendations(tracks) {
         'from-emerald-900 to-green-700',
     ]
 
-    container.innerHTML = tracks.map((track, i) => `
+    container.innerHTML = `<div class="flex flex-col gap-2 overflow-y-auto h-full pr-0.5">${tracks.map((track, i) => `
         <div class="match-card neon-card-cyan bg-[#14141f] border border-cyan-500/15 hover:border-cyan-500/40 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all group">
             <div class="album-thumb w-10 h-10 rounded-lg bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-base shrink-0 overflow-hidden">
                 ${track.image
@@ -199,5 +199,5 @@ function renderRecommendations(tracks) {
                 <span class="badge badge-xs bg-cyan-900/50 text-cyan-300 border-cyan-500/20 font-mono">${track.bpm || '—'} BPM</span>
             </div>
         </div>`
-    ).join('')
+    ).join('')}</div>`
 }
