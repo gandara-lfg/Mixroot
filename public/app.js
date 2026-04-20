@@ -1,13 +1,52 @@
-// BPM slider live update
+// Dual-handle BPM range slider
 document.addEventListener('DOMContentLoaded', () => {
-    const bpmRange = document.getElementById('bpmRange')
-    const bpmValue = document.getElementById('bpmValue')
+    const minThumb = document.getElementById('bpmRangeMin')
+    const maxThumb = document.getElementById('bpmRangeMax')
+    const minLabel = document.getElementById('bpmMin')
+    const maxLabel = document.getElementById('bpmMax')
+    const fill    = document.getElementById('bpmRangeFill')
 
-    if (bpmRange && bpmValue) {
-        bpmRange.addEventListener('input', () => {
-            bpmValue.textContent = bpmRange.value
-        })
+    const RANGE_MIN = 60
+    const RANGE_MAX = 220
+    const TOTAL     = RANGE_MAX - RANGE_MIN
+
+    function updateDisplay() {
+        let minVal = parseInt(minThumb.value)
+        let maxVal = parseInt(maxThumb.value)
+
+        // Keep min from passing max and vice versa
+        if (minVal > maxVal) {
+            minVal = maxVal
+            minThumb.value = minVal
+        }
+        if (maxVal < minVal) {
+            maxVal = minVal
+            maxThumb.value = maxVal
+        }
+
+        minLabel.textContent = minVal
+        maxLabel.textContent = maxVal
+
+        // Position the amber fill between the two thumbs
+        const leftPct  = ((minVal - RANGE_MIN) / TOTAL) * 100
+        const rightPct = ((RANGE_MAX - maxVal)  / TOTAL) * 100
+        fill.style.left  = leftPct  + '%'
+        fill.style.right = rightPct + '%'
+
+        // Raise the min thumb's z-index when it's pushed to the far right
+        // so the user can always drag it back left
+        if (minVal > (RANGE_MAX + RANGE_MIN) / 2) {
+            minThumb.style.zIndex = 5
+        } else {
+            minThumb.style.zIndex = 3
+        }
     }
+
+    minThumb.addEventListener('input', updateDisplay)
+    maxThumb.addEventListener('input', updateDisplay)
+
+    // Set initial fill position on page load
+    updateDisplay()
 })
 
 async function searchSong() {
