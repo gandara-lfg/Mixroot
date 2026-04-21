@@ -40,7 +40,6 @@ app.get('/search', async (req, res) => {
     if (!data.tracks || data.tracks.items.length === 0) {
         return res.json({ error: 'Song not found' })
     }
-
     // Grab the first result from Spotify
     const track = data.tracks.items[0]
     const artistId = track.artists[0].id
@@ -60,9 +59,26 @@ app.get('/search', async (req, res) => {
         audio = scObject.audio
 
         const scGenres = scObject.genres
+        const genres = []
+
         if (scGenres && scGenres.length > 0) {
-            genre = scGenres[0].root
+            for (let i = 0; i < scGenres.length; i++) {
+                if (scGenres[i].root == 'edm' && scGenres[i].sub && scGenres[i].sub.length > 0) {
+                    genres.push(scGenres[i].sub[0])
+                    break
+                }
+            }
+
+            for (let i = 0; i < scGenres.length; i++) {
+                if (genres.length >= 2) break
+                if (scGenres[i].root != 'edm') {
+                    genres.push(scGenres[i].root)
+                }
+            }
         }
+
+        genre = genres
+        console.log(scObject.genres)
     }
 
     // Pull the album image URL out of the Spotify response
@@ -84,7 +100,7 @@ app.get('/search', async (req, res) => {
         spotifyUrl: track.external_urls.spotify,
         key: key,
         bpm: bpm,
-        genre: genre
+        genres: genre
     })
 })
 

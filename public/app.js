@@ -107,7 +107,8 @@ async function searchSong() {
                 </div>
                 <div class="stat-pill bg-[#0d0d18] rounded-xl p-2 text-center border border-pink-500/10">
                     <p class="text-[9px] text-gray-500 uppercase tracking-wider">Genre</p>
-                    <p class="text-sm font-bold text-pink-300 mt-0.5">${data.genre || '—'}</p>
+                    <p class="text-sm font-bold text-pink-300 mt-0.5">${data.genres && data.genres.length > 0 ? data.genres[0] : '—'}</p>
+                    <p class="text-[10px] font-semibold text-pink-300 opacity-60 mt-0.5">${data.genres && data.genres.length > 1 ? data.genres[1] : ''}</p>
                 </div>
             </div>
             ${data.spotifyUrl ? `
