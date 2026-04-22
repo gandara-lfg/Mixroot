@@ -119,6 +119,32 @@ async function searchSong() {
         </div>`
 }
 
+async function searchArtistSongs() {
+    const input = document.getElementById('artistSearchInput')
+    const container = document.getElementById('recommendations')
+    const countBadge = document.getElementById('matchCount')
+
+    const artist = input.value.trim()
+    if (!artist) return
+
+    container.innerHTML = `
+        <div class="flex items-center justify-center h-full">
+            <span class="loading loading-spinner loading-md" style="color:#c8a86e"></span>
+        </div>`
+    if (countBadge) countBadge.textContent = ''
+
+    const response = await fetch(`/artist-songs?artist=${encodeURIComponent(artist)}`)
+    const data = await response.json()
+
+    if (data.error) {
+        container.innerHTML = `
+            <div class="flex items-center justify-center h-full text-sm" style="color:#c0806a">${data.error}</div>`
+        return
+    }
+
+    renderRecommendations(data.tracks)
+}
+
 // ─── DRAGGABLE KNOBS ────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {

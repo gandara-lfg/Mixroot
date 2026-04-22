@@ -6,8 +6,8 @@ app.use(express.static('public'))
 app.use(express.json())
 
 // Import helper functions for talking to Spotify and Soundcharts
-const { searchSong, getArtist } = require('./spotify')
-const { getSongBySpotifyId } = require('./soundcharts')
+const { searchSong, searchArtist } = require('./spotify')
+const { getSongBySpotifyId, getArtistSongs, getArtistBySpotifyId } = require('./soundcharts')
 
 // Maps Spotify's numeric key (0-11) to a note name, and adds 'm' if the song is in a minor key
 const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -44,10 +44,10 @@ app.get('/search', async (req, res) => {
     const track = data.tracks.items[0]
     const artistId = track.artists[0].id
 
-    // Fetch the artist details from Spotify and the audio data from Soundcharts at the same time
-    const [artistData, soundchartsData] = await Promise.all([
-        getArtist(artistId),
-        getSongBySpotifyId(track.id)
+    console.log(artistId)
+    const [soundchartsData, artistSongs] = await Promise.all([
+        getSongBySpotifyId(track.id),
+        getArtistSongs(artistId)
     ])
 
     // Pull the audio features and genre out of the Soundcharts response
@@ -78,7 +78,6 @@ app.get('/search', async (req, res) => {
         }
 
         genre = genres
-        console.log(scObject.genres)
     }
 
     // Pull the album image URL out of the Spotify response
@@ -102,6 +101,43 @@ app.get('/search', async (req, res) => {
         bpm: bpm,
         genres: genre
     })
+})
+
+// Route: Search for an artist and return their top 10 songs by Spotify popularity
+app.get('/artist-songs', async (req, res) => {
+    const artist = req.query.artist
+    if (!artist) return res.json({ error: 'Missing artist' })
+
+    const searchData = await searchArtist(artist)
+    if (!searchData.artists || searchData.artists.items.length === 0) {
+        return res.json({ error: 'Artist not found' })
+    }
+
+    const spotifyArtistId = searchData.artists.items[0].id
+    const scArtist = await getArtistBySpotifyId(spotifyArtistId)
+
+    if (!scArtist.object || !scArtist.object.uuid) {
+        return res.json({ error: 'Artist not found in Soundcharts' })
+    }
+
+    const songsData = await getArtistSongs(scArtist.object.uuid)
+    const items = songsData.items || []
+    console.log(songsData)
+    console.log('-------------\
+                    switch\
+                --------------')
+    console.log(items)
+
+    const tracks = items.map(item => ({
+        song: item.name,
+        artist: searchData.artists.items[0].name,
+        image: item.imageUrl || null,
+        popularity: item.spotifyPopularity || null,
+        key: null,
+        bpm: null
+    }))
+
+    res.json({ tracks })
 })
 
 // Start the server on port 3000

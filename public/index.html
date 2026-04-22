@@ -168,9 +168,17 @@
                 </div>
             </div>
 
+            <!-- Artist search -->
+            <div class="flex gap-2 w-full">
+                <input id="artistSearchInput" type="text" placeholder="Artist…"
+                    class="search-input flex-1 min-w-0"
+                    onkeydown="if(event.key==='Enter') searchArtistSongs()">
+                <button onclick="searchArtistSongs()" class="search-btn">Search</button>
+            </div>
+
             <!-- Match count -->
             <div class="flex items-center justify-between w-full px-1">
-                <span class="deck-label-text">Matches</span>
+                <span class="deck-label-text">Top Songs</span>
                 <span id="matchCount" class="text-[9px] font-semibold text-[#8a7a60] tracking-wider"></span>
             </div>
 

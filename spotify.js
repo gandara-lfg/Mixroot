@@ -58,4 +58,13 @@ async function getArtist(artistId) {
     return await response.json()
 }
 
-module.exports = { getTokenSpotify, searchSong, getArtist }
+async function searchArtist(artistName) {
+    const token = await getTokenSpotify()
+    const response = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(artistName)}&type=artist&limit=1`,
+        { headers: { Authorization: 'Bearer ' + token } }
+    )
+    return await response.json()
+}
+
+module.exports = { getTokenSpotify, searchSong, getArtist, searchArtist }
