@@ -7,7 +7,7 @@ app.use(express.json())
 
 // Import helper functions for talking to Spotify and Soundcharts
 const { searchSong, searchArtist } = require('./spotify')
-const { getSongBySpotifyId, getArtistSongs, getArtistBySpotifyId } = require('./soundcharts')
+const { getSongByUuid, getSongBySpotifyId, getArtistSongs, getArtistBySpotifyId } = require('./soundcharts')
 
 // Maps Spotify's numeric key (0-11) to a note name, and adds 'm' if the song is in a minor key
 const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -22,6 +22,14 @@ function formatKey(keyNum, mode) {
         suffix = ''
     }
     return noteName + suffix
+}
+
+function getKeyAndBpm(audio) {
+    if (audio) {
+        return { key: formatKey(audio.key, audio.mode), bpm: audio.tempo ? Math.round(audio.tempo) : null }
+    } else {
+        return { key: null, bpm: null }
+    }
 }
 
 // Route: Search for a single song by name and artist, then return its audio info
@@ -44,11 +52,11 @@ app.get('/search', async (req, res) => {
     const track = data.tracks.items[0]
     const artistId = track.artists[0].id
 
-    console.log(artistId)
     const [soundchartsData, artistSongs] = await Promise.all([
         getSongBySpotifyId(track.id),
         getArtistSongs(artistId)
     ])
+   
 
     // Pull the audio features and genre out of the Soundcharts response
     const scObject = soundchartsData.object
@@ -57,7 +65,6 @@ app.get('/search', async (req, res) => {
 
     if (scObject) {
         audio = scObject.audio
-
         const scGenres = scObject.genres
         const genres = []
 
@@ -84,9 +91,7 @@ app.get('/search', async (req, res) => {
     const albumImages = track.album.images
     const imageUrl = albumImages.length > 0 ? albumImages[0].url : null
 
-    // Build the key and BPM values, falling back to null if data is missing
-    const key = audio ? formatKey(audio.key, audio.mode) : null
-    const bpm = audio && audio.tempo ? Math.round(audio.tempo) : null
+    const { key, bpm } = getKeyAndBpm(audio)
 
     console.log(track.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
 
@@ -122,21 +127,34 @@ app.get('/artist-songs', async (req, res) => {
 
     const songsData = await getArtistSongs(scArtist.object.uuid)
     const items = songsData.items || []
-    console.log(songsData)
-    console.log('-------------\
-                    switch\
-                --------------')
-    console.log(items)
+    const scDetails = {}
+    for (const item of items) {
+        const songData = await getSongByUuid(item.uuid)
+        const scObject = songData.object || null
+        const audio = scObject ? scObject.audio : null
+        const { key, bpm } = getKeyAndBpm(audio)
+        let genre = null
+        if (scObject && scObject.genres && scObject.genres.length > 0) {
+            genre = scObject.genres[0].root
+        }
+        console.log(item.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
+        scDetails[item.uuid] = { key, bpm, genre }
+    }
 
-    const tracks = items.map(item => ({
-        song: item.name,
-        artist: searchData.artists.items[0].name,
-        image: item.imageUrl || null,
-        popularity: item.spotifyPopularity || null,
-        key: null,
-        bpm: null
-    }))
-
+    const tracks = []
+    for (const item of items) {
+        const details = scDetails[item.uuid] || { key: null, bpm: null, genre: null }
+        tracks.push({
+            song: item.name,
+            artist: searchData.artists.items[0].name,
+            image: item.imageUrl || null,
+            popularity: item.spotifyPopularity || null,
+            key: details.key,
+            bpm: details.bpm,
+            genre: details.genre
+        })
+    }
+    
     res.json({ tracks })
 })
 
