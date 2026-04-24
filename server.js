@@ -7,7 +7,43 @@ app.use(express.json())
 
 // Import helper functions for talking to Spotify and Soundcharts
 const { searchSong, searchArtist } = require('./spotify')
-const { getSongByUuid, getSongBySpotifyId, getArtistSongs, getArtistBySpotifyId } = require('./soundcharts')
+const { getSongByUuid, getSongBySpotifyId, getArtistSongs, getArtistBySpotifyId, getRecSongs } = require('./soundcharts')
+
+// Maps key strings (as returned by formatKey) to Soundcharts pitch class integers (0–11)
+const KEY_TO_PITCH = {
+    'C': 0,   'C#': 1,  'D': 2,   'D#': 3,  'E': 4,  'F': 5,
+    'F#': 6,  'G': 7,   'G#': 8,  'A': 9,   'A#': 10, 'B': 11,
+    'Cm': 0,  'C#m': 1, 'Dm': 2,  'D#m': 3, 'Em': 4, 'Fm': 5,
+    'F#m': 6, 'Gm': 7,  'G#m': 8, 'Am': 9,  'A#m': 10, 'Bm': 11,
+}
+
+// Camelot wheel — for each key, the 4 harmonically compatible keys (same, relative, +1, -1)
+const HARMONIC_KEYS = {
+    'C':   ['C', 'Am', 'G', 'F'],
+    'G':   ['G', 'Em', 'D', 'C'],
+    'D':   ['D', 'Bm', 'A', 'G'],
+    'A':   ['A', 'F#m', 'E', 'D'],
+    'E':   ['E', 'C#m', 'B', 'A'],
+    'B':   ['B', 'G#m', 'F#', 'E'],
+    'F#':  ['F#', 'D#m', 'C#', 'B'],
+    'C#':  ['C#', 'A#m', 'G#', 'F#'],
+    'G#':  ['G#', 'Fm', 'D#', 'C#'],
+    'D#':  ['D#', 'Cm', 'A#', 'G#'],
+    'A#':  ['A#', 'Gm', 'F', 'D#'],
+    'F':   ['F', 'Dm', 'C', 'A#'],
+    'Am':  ['Am', 'C', 'Em', 'Dm'],
+    'Em':  ['Em', 'G', 'Bm', 'Am'],
+    'Bm':  ['Bm', 'D', 'F#m', 'Em'],
+    'F#m': ['F#m', 'A', 'C#m', 'Bm'],
+    'C#m': ['C#m', 'E', 'G#m', 'F#m'],
+    'G#m': ['G#m', 'B', 'D#m', 'C#m'],
+    'D#m': ['D#m', 'F#', 'A#m', 'G#m'],
+    'A#m': ['A#m', 'C#', 'Fm', 'D#m'],
+    'Fm':  ['Fm', 'G#', 'Cm', 'A#m'],
+    'Cm':  ['Cm', 'D#', 'Gm', 'Fm'],
+    'Gm':  ['Gm', 'A#', 'Dm', 'Cm'],
+    'Dm':  ['Dm', 'F', 'Am', 'Gm'],
+}
 
 // Maps Spotify's numeric key (0-11) to a note name, and adds 'm' if the song is in a minor key
 const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -123,10 +159,6 @@ app.get('/artist-songs', async (req, res) => {
     const songsData = await getArtistSongs(scArtist.object.uuid)
     const items = songsData.items || []
 
-    // Log the first item's full shape — useful to check if Spotify IDs are
-    // available (would let us swap these 5 calls for 1 Spotify batch call)
-    if (items.length > 0) console.log('[item shape]', JSON.stringify(items[0], null, 2))
-
     const songDetails = await Promise.all(items.map(async function(item) {
         const songData = await getSongByUuid(item.uuid)
         const scObject = songData.object || null
@@ -155,6 +187,64 @@ app.get('/artist-songs', async (req, res) => {
         })
     }
     
+    res.json({ tracks })
+})
+
+// Route: Return top songs that are harmonically compatible with a given key
+app.get('/rec-songs', async (req, res) => {
+    const key = req.query.key
+    if (!key) return res.json({ error: 'Missing key' })
+
+    const harmonicKeys = HARMONIC_KEYS[key]
+    if (!harmonicKeys) return res.json({ error: 'Unknown key: ' + key })
+
+    const pitchClasses = []
+    for (let i = 0; i < harmonicKeys.length; i++) {
+        const pitch = KEY_TO_PITCH[harmonicKeys[i]]
+        if (pitch !== undefined && pitchClasses.indexOf(pitch) === -1) {
+            pitchClasses.push(pitch)
+        }
+    }
+
+    // Build exact (pitch, mode) pairs so we can filter out wrong-mode results
+    // Soundcharts only filters by pitch class, not mode, so E and Em both come back
+    const validPairs = []
+    for (let i = 0; i < harmonicKeys.length; i++) {
+        const k = harmonicKeys[i]
+        const pitch = KEY_TO_PITCH[k]
+        const mode = k.endsWith('m') ? 0 : 1
+        validPairs.push({ pitch: pitch, mode: mode })
+    }
+
+    const offset = Math.floor(Math.random() * 150)
+    console.log('[rec-songs] deck A key:', key, '| pitch classes:', pitchClasses, '| offset:', offset)
+    const data = await getRecSongs(pitchClasses, offset)
+
+    const allItems = data.items || []
+    const items = allItems.filter(function(item) {
+        if (!item.audio) return false
+        for (let i = 0; i < validPairs.length; i++) {
+            if (item.audio.key === validPairs[i].pitch && item.audio.mode === validPairs[i].mode) {
+                return true
+            }
+        }
+        return false
+    })
+
+    const tracks = items.map(function(item) {
+        const song = item.song || {}
+        const audio = item.audio || null
+        const { key, bpm } = getKeyAndBpm(audio)
+        return {
+            song: song.name,
+            artist: song.creditName || '',
+            image: song.imageUrl || null,
+            popularity: null,
+            key: key,
+            bpm: bpm,
+            genre: null
+        }
+    })
     res.json({ tracks })
 })
 

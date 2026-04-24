@@ -26,7 +26,7 @@
     <main class="flex-1 flex overflow-hidden min-h-0">
 
         <!-- ══ LEFT DECK ══ -->
-        <section class="deck-panel flex-1 flex flex-col items-center gap-3 px-5 py-4 border-r border-white/[0.04]">
+        <section class="deck-panel flex-1 min-h-0 flex flex-col items-center gap-3 px-5 py-4 border-r border-white/[0.04]">
 
             <div class="flex items-center gap-2 self-start">
                 <div class="deck-dot"></div>
@@ -47,7 +47,7 @@
             </div>
 
             <!-- Search inputs -->
-            <div class="flex gap-2 w-full">
+            <div class="flex gap-2 w-full shrink-0">
                 <input id="songInput" type="text" placeholder="Song…"
                     class="search-input flex-1 min-w-0">
                 <input id="artistInput" type="text" placeholder="Artist…"
@@ -133,6 +133,27 @@
             <!-- Hairline -->
             <div class="w-full h-px bg-white/[0.05]"></div>
 
+            <!-- Release Year knob -->
+            <div class="knob-group">
+                <div id="yearKnob" class="mixer-knob">
+                    <div class="knob-notch"></div>
+                </div>
+                <p class="knob-title">Release Year</p>
+                <p id="yearLabel" class="knob-value">All Years</p>
+                <select id="yearFilter" class="hidden">
+                    <option value="">All Years</option>
+                    <option value="1970">1970s</option>
+                    <option value="1980">1980s</option>
+                    <option value="1990">1990s</option>
+                    <option value="2000">2000s</option>
+                    <option value="2010">2010s</option>
+                    <option value="2020">2020s</option>
+                </select>
+            </div>
+
+            <!-- Hairline -->
+            <div class="w-full h-px bg-white/[0.05]"></div>
+
             <!-- Crossfader -->
             <div class="w-full flex flex-col items-center gap-2 mt-auto">
                 <p class="knob-title">Crossfader</p>
@@ -148,7 +169,7 @@
         </section>
 
         <!-- ══ RIGHT DECK ══ -->
-        <section class="deck-panel flex-1 flex flex-col items-center gap-3 px-5 py-4 border-l border-white/[0.04]">
+        <section class="deck-panel flex-1 min-h-0 flex flex-col items-center gap-3 px-5 py-4 border-l border-white/[0.04]">
 
             <div class="flex items-center gap-2 self-start">
                 <div class="deck-dot"></div>
@@ -169,25 +190,24 @@
             </div>
 
             <!-- Deck B Tabs -->
-            <div class="deck-tabs w-full">
+            <div class="deck-tabs w-full shrink-0">
                 <button class="deck-tab deck-tab-active" data-tab="artist" onclick="switchDeckTab('artist')">Artist</button>
-                <button class="deck-tab" data-tab="genre" onclick="switchDeckTab('genre')">Genre</button>
-                <button class="deck-tab" data-tab="popularity" onclick="switchDeckTab('popularity')">Popularity</button>
+                <button class="deck-tab" data-tab="discover" onclick="switchDeckTab('discover')">Discover</button>
             </div>
 
             <!-- Tab: Artist Search -->
             <div id="deck-tab-artist" class="w-full flex flex-col gap-3 flex-1 min-h-0">
-                <div class="flex gap-2 w-full">
+                <div class="flex gap-2 w-full shrink-0">
                     <input id="artistSearchInput" type="text" placeholder="Artist…"
                         class="search-input flex-1 min-w-0"
                         onkeydown="if(event.key==='Enter') searchArtistSongs()">
                     <button onclick="searchArtistSongs()" class="search-btn">Search</button>
                 </div>
-                <div class="flex items-center justify-between w-full px-1">
+                <div class="flex items-center justify-between w-full px-1 shrink-0">
                     <span class="deck-label-text">Top Songs</span>
                     <span id="matchCount" class="text-[9px] font-semibold text-[#8a7a60] tracking-wider"></span>
                 </div>
-                <div id="recommendations" class="w-full flex-1 min-h-0">
+                <div id="recommendations" class="w-full flex-1 min-h-0 relative">
                     <div class="info-empty h-full">
                         <svg class="w-5 h-5 text-[#332f28] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -198,25 +218,17 @@
                 </div>
             </div>
 
-            <!-- Tab: By Genre -->
-            <div id="deck-tab-genre" class="w-full flex-1 min-h-0 hidden">
-                <div class="info-empty h-full flex-col gap-2">
-                    <svg class="w-5 h-5 text-[#332f28] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
-                    </svg>
-                    <p class="info-empty-text">Genre matching coming soon</p>
+            <!-- Tab: Discover -->
+            <div id="deck-tab-discover" class="w-full flex flex-col gap-3 flex-1 min-h-0 hidden">
+                <button onclick="searchRecSongs()" class="search-btn w-full shrink-0">Find Harmonic Matches</button>
+                <div class="flex items-center justify-between w-full px-1 shrink-0">
+                    <span class="deck-label-text">Harmonic Matches</span>
+                    <span id="recMatchCount" class="text-[9px] font-semibold text-[#8a7a60] tracking-wider"></span>
                 </div>
-            </div>
-
-            <!-- Tab: By Popularity -->
-            <div id="deck-tab-popularity" class="w-full flex-1 min-h-0 hidden">
-                <div class="info-empty h-full flex-col gap-2">
-                    <svg class="w-5 h-5 text-[#332f28] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                    </svg>
-                    <p class="info-empty-text">Popularity ranking coming soon</p>
+                <div id="rec-results" class="w-full flex-1 min-h-0 relative">
+                    <div class="info-empty h-full">
+                        <p class="info-empty-text">Load Deck A first</p>
+                    </div>
                 </div>
             </div>
 

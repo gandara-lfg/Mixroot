@@ -1,3 +1,5 @@
+let deckAKey = null
+
 // Dual-handle BPM range slider
 document.addEventListener('DOMContentLoaded', () => {
     const minThumb = document.getElementById('bpmRangeMin')
@@ -84,6 +86,8 @@ async function searchSong() {
         return
     }
 
+    deckAKey = data.key || null
+
     result.innerHTML = `
         <div class="neon-card-purple h-full rounded-2xl bg-[#14141f] border border-purple-500/20 p-4 flex flex-col justify-between">
             <div class="flex items-center gap-3">
@@ -145,13 +149,76 @@ async function searchArtistSongs() {
     renderRecommendations(data.tracks)
 }
 
+async function searchRecSongs() {
+    const container = document.getElementById('rec-results')
+    const countBadge = document.getElementById('recMatchCount')
+
+    if (!deckAKey) {
+        container.innerHTML = `
+            <div class="flex items-center justify-center h-full text-sm" style="color:#c0806a">
+                Load a song on Deck A first.
+            </div>`
+        return
+    }
+
+    container.innerHTML = `
+        <div class="flex items-center justify-center h-full">
+            <span class="loading loading-spinner loading-md" style="color:#c8a86e"></span>
+        </div>`
+    if (countBadge) countBadge.textContent = ''
+
+    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey))
+    const data = await response.json()
+
+    if (data.error) {
+        container.innerHTML = `
+            <div class="flex items-center justify-center h-full text-sm" style="color:#c0806a">${data.error}</div>`
+        return
+    }
+
+    const tracks = data.tracks
+    if (!tracks || tracks.length === 0) {
+        container.innerHTML = `
+            <div class="flex items-center justify-center h-full text-gray-600 text-sm">No matches found.</div>`
+        if (countBadge) countBadge.textContent = '0 found'
+        return
+    }
+
+    if (countBadge) countBadge.textContent = tracks.length + ' found'
+
+    const colors = [
+        'from-cyan-900 to-teal-700',
+        'from-violet-900 to-indigo-700',
+        'from-pink-900 to-rose-700',
+        'from-amber-900 to-orange-700',
+        'from-emerald-900 to-green-700',
+    ]
+
+    container.innerHTML = '<div class="absolute inset-0 flex flex-col gap-1.5 overflow-y-auto pr-0.5">' + tracks.map(function(track, i) {
+        return `
+        <div class="match-card bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-2 py-1.5 flex items-center gap-2 cursor-pointer transition-all group">
+            <div class="w-7 h-7 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] shrink-0 overflow-hidden">
+                ${track.image ? '<img src="' + track.image + '" class="w-full h-full object-cover" alt="">' : '♫'}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[11px] font-semibold text-white truncate group-hover:text-[#c8a86e] transition-colors">${track.song}</p>
+                <p class="text-[9px] text-[#5a5248] truncate">${track.artist}</p>
+            </div>
+            <div class="flex gap-1 shrink-0">
+                <span class="text-[8px] font-bold text-purple-300 bg-[#0d0d18] border border-purple-500/10 rounded px-1.5 py-0.5">${track.key || '—'}</span>
+                <span class="text-[8px] font-bold text-cyan-300 bg-[#0d0d18] border border-cyan-500/10 rounded px-1.5 py-0.5">${track.bpm || '—'}</span>
+            </div>
+        </div>`
+    }).join('') + '</div>'
+}
+
 // ─── DECK B TAB SWITCHING ───────────────────────────────────────────────────
 
 function switchDeckTab(tab) {
-    const tabs = ['artist', 'genre', 'popularity']
-    tabs.forEach(t => {
-        document.getElementById(`deck-tab-${t}`).classList.toggle('hidden', t !== tab)
-        const btn = document.querySelector(`[data-tab="${t}"]`)
+    const tabs = ['artist', 'discover']
+    tabs.forEach(function(t) {
+        document.getElementById('deck-tab-' + t).classList.toggle('hidden', t !== tab)
+        const btn = document.querySelector('[data-tab="' + t + '"]')
         if (btn) btn.classList.toggle('deck-tab-active', t === tab)
     })
 }
@@ -172,11 +239,22 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
 
     const sortOptions = [
-        { label: 'Key Match',   value: 'Key Match' },
+        { label: 'Key Match', value: 'Key Match' },
+    ]
+
+    const yearOptions = [
+        { label: 'All Years', value: '' },
+        { label: '1970s',     value: '1970' },
+        { label: '1980s',     value: '1980' },
+        { label: '1990s',     value: '1990' },
+        { label: '2000s',     value: '2000' },
+        { label: '2010s',     value: '2010' },
+        { label: '2020s',     value: '2020' },
     ]
 
     initDragKnob('genreKnob', genreOptions, 'genreFilter', 'genreLabel')
     initDragKnob('sortKnob',  sortOptions,  'sortBy',      'sortLabel')
+    initDragKnob('yearKnob',  yearOptions,  'yearFilter',  'yearLabel')
 })
 
 function initDragKnob(knobId, options, selectId, labelId) {
@@ -260,7 +338,7 @@ function renderRecommendations(tracks) {
         'from-emerald-900 to-green-700',
     ]
 
-    container.innerHTML = `<div class="flex flex-col gap-2 overflow-y-auto h-full pr-0.5">${tracks.map((track, i) => `
+    container.innerHTML = `<div class="absolute inset-0 flex flex-col gap-2 overflow-y-auto pr-0.5">${tracks.map((track, i) => `
         <div class="match-card neon-card-cyan bg-[#14141f] border border-cyan-500/15 hover:border-cyan-500/40 rounded-xl p-3 flex flex-col gap-2 cursor-pointer transition-all group">
             <div class="flex items-center gap-3">
                 <div class="album-thumb w-10 h-10 rounded-lg bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-base shrink-0 overflow-hidden">

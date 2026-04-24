@@ -56,4 +56,40 @@ async function getArtistSongs(soundchartsArtistId) {
     return await response.json()
 }
 
-module.exports = { getSongByUuid, getSongBySpotifyId, getArtistBySpotifyId, getArtistSongs }
+async function getRecSongsByGenre(genres, keys) {
+    const response = fetch('https://customer.api.soundcharts.com/api/v2/top/songs?offset=0&limit=100', 
+        {
+            method: 'POST',
+            headers: {
+                'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+                'x-api-key': process.env.SOUNDCHARTS_API_KEY,
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+            body: `{"sort": {"platform": "spotify","metricType": "streams", "sortBy": "total","order": "desc"},"filters": [{"type": "metric","data": {"platform": "spotify","metricType": "streams","min": "1000000","max": "100000000"}}, {"type":"songGenres", "data.values": {${genres}}{"type": "releaseDate","data": {"min": "2010-01-01","max": "2026-03-31","operator": "in"}}, {"type":"songKey", "data.values":{${keys}}]}`
+        }
+    )
+}
+
+async function getRecSongs(keys, offset) {
+    const body = {
+        sort: { platform: 'spotify', metricType: 'streams', sortBy: 'total', order: 'desc' },
+        filters: [
+            { type: 'metric', data: { platform: 'spotify', metricType: 'streams', min: '1000000' } },
+            { type: 'releaseDate', data: { min: '1970-01-01', max: '2026-03-31', operator: 'in' } },
+            { type: 'songKey', data: { values: keys, operator: 'in' } },
+            { type: 'territory', data: { values: ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR'], operator: 'in' } }
+        ]
+    }
+    const response = await fetch('https://customer.api.soundcharts.com/api/v2/top/songs?offset=' + offset + '&limit=50', {
+        method: 'POST',
+        headers: {
+            'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+            'x-api-key': process.env.SOUNDCHARTS_API_KEY,
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    })
+    return await response.json()
+}
+
+module.exports = { getSongByUuid, getSongBySpotifyId, getArtistBySpotifyId, getArtistSongs, getRecSongs }
