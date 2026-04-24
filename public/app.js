@@ -145,6 +145,17 @@ async function searchArtistSongs() {
     renderRecommendations(data.tracks)
 }
 
+// ─── DECK B TAB SWITCHING ───────────────────────────────────────────────────
+
+function switchDeckTab(tab) {
+    const tabs = ['artist', 'genre', 'popularity']
+    tabs.forEach(t => {
+        document.getElementById(`deck-tab-${t}`).classList.toggle('hidden', t !== tab)
+        const btn = document.querySelector(`[data-tab="${t}"]`)
+        if (btn) btn.classList.toggle('deck-tab-active', t === tab)
+    })
+}
+
 // ─── DRAGGABLE KNOBS ────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {

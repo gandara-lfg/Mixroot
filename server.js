@@ -50,13 +50,8 @@ app.get('/search', async (req, res) => {
     }
     // Grab the first result from Spotify
     const track = data.tracks.items[0]
-    const artistId = track.artists[0].id
 
-    const [soundchartsData, artistSongs] = await Promise.all([
-        getSongBySpotifyId(track.id),
-        getArtistSongs(artistId)
-    ])
-   
+    const soundchartsData = await getSongBySpotifyId(track.id)
 
     // Pull the audio features and genre out of the Soundcharts response
     const scObject = soundchartsData.object
@@ -127,8 +122,12 @@ app.get('/artist-songs', async (req, res) => {
 
     const songsData = await getArtistSongs(scArtist.object.uuid)
     const items = songsData.items || []
-    const scDetails = {}
-    for (const item of items) {
+
+    // Log the first item's full shape — useful to check if Spotify IDs are
+    // available (would let us swap these 5 calls for 1 Spotify batch call)
+    if (items.length > 0) console.log('[item shape]', JSON.stringify(items[0], null, 2))
+
+    const songDetails = await Promise.all(items.map(async function(item) {
         const songData = await getSongByUuid(item.uuid)
         const scObject = songData.object || null
         const audio = scObject ? scObject.audio : null
@@ -138,12 +137,13 @@ app.get('/artist-songs', async (req, res) => {
             genre = scObject.genres[0].root
         }
         console.log(item.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
-        scDetails[item.uuid] = { key, bpm, genre }
-    }
+        return { key, bpm, genre }
+    }))
 
     const tracks = []
-    for (const item of items) {
-        const details = scDetails[item.uuid] || { key: null, bpm: null, genre: null }
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        const details = songDetails[i]
         tracks.push({
             song: item.name,
             artist: searchData.artists.items[0].name,
