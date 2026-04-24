@@ -216,13 +216,16 @@ app.get('/rec-songs', async (req, res) => {
         validPairs.push({ pitch: pitch, mode: mode })
     }
 
+    const year = req.query.year || ''
     const offset = Math.floor(Math.random() * 150)
-    console.log('[rec-songs] deck A key:', key, '| pitch classes:', pitchClasses, '| offset:', offset)
-    const data = await getRecSongs(pitchClasses, offset)
+    console.log('[rec-songs] deck A key:', key, '| year:', year || 'All Years', '| offset:', offset)
+    const data = await getRecSongs(pitchClasses, offset, year)
 
     const allItems = data.items || []
     const items = allItems.filter(function(item) {
         if (!item.audio) return false
+        // If a decade was selected, drop songs with no release date
+        if (year && !item.song.releaseDate) return false
         for (let i = 0; i < validPairs.length; i++) {
             if (item.audio.key === validPairs[i].pitch && item.audio.mode === validPairs[i].mode) {
                 return true
@@ -235,6 +238,7 @@ app.get('/rec-songs', async (req, res) => {
         const song = item.song || {}
         const audio = item.audio || null
         const { key, bpm } = getKeyAndBpm(audio)
+        const releaseYear = song.releaseDate ? song.releaseDate.substring(0, 4) : null
         return {
             song: song.name,
             artist: song.creditName || '',
@@ -242,7 +246,8 @@ app.get('/rec-songs', async (req, res) => {
             popularity: null,
             key: key,
             bpm: bpm,
-            genre: null
+            genre: null,
+            releaseYear: releaseYear
         }
     })
     res.json({ tracks })

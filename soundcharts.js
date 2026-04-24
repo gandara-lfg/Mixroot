@@ -70,15 +70,20 @@ async function getRecSongsByGenre(genres, keys) {
     )
 }
 
-async function getRecSongs(keys, offset) {
+async function getRecSongs(keys, offset, year) {
+    const dates = getYears(year)
+    console.log('[getRecSongs] year param:', year || 'All Years', '| date range:', dates.start, '→', dates.end)
+    const filters = [
+        { type: 'metric', data: { platform: 'spotify', metricType: 'streams', min: '1000000' } },
+        { type: 'songKey', data: { values: keys, operator: 'in' } },
+        { type: 'territory', data: { values: ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR'], operator: 'in' } }
+    ]
+    if (year) {
+        filters.splice(1, 0, { type: 'releaseDate', data: { min: dates.start, max: dates.end, operator: 'in' } })
+    }
     const body = {
         sort: { platform: 'spotify', metricType: 'streams', sortBy: 'total', order: 'desc' },
-        filters: [
-            { type: 'metric', data: { platform: 'spotify', metricType: 'streams', min: '1000000' } },
-            { type: 'releaseDate', data: { min: '1970-01-01', max: '2026-03-31', operator: 'in' } },
-            { type: 'songKey', data: { values: keys, operator: 'in' } },
-            { type: 'territory', data: { values: ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR'], operator: 'in' } }
-        ]
+        filters: filters
     }
     const response = await fetch('https://customer.api.soundcharts.com/api/v2/top/songs?offset=' + offset + '&limit=50', {
         method: 'POST',
@@ -90,6 +95,26 @@ async function getRecSongs(keys, offset) {
         body: JSON.stringify(body)
     })
     return await response.json()
+}
+
+function getYears(year) {
+    let start, end
+    if (year == '' || year == 'All Years') {
+        start = '1970-01-01'
+        end = '2026-04-24'
+    } else if (year == '2020') {
+        start = '2020-01-01'
+        end = '2026-04-24'
+    } else {
+        start = year + '-01-01'
+        const yearNum = Number(year)
+        if (yearNum >= 2000) {
+            end = '20' + year[2] + '9-12-31'
+        } else {
+            end = '19' + year[2] + '9-12-31'
+        }
+    }
+    return { start: start, end: end }
 }
 
 module.exports = { getSongByUuid, getSongBySpotifyId, getArtistBySpotifyId, getArtistSongs, getRecSongs }

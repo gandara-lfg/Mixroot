@@ -167,7 +167,8 @@ async function searchRecSongs() {
         </div>`
     if (countBadge) countBadge.textContent = ''
 
-    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey))
+    const year = document.getElementById('yearFilter').value
+    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year))
     const data = await response.json()
 
     if (data.error) {
@@ -207,6 +208,7 @@ async function searchRecSongs() {
             <div class="flex flex-col gap-1 shrink-0 items-end">
                 <span class="text-[10px] font-bold text-purple-300 bg-[#0d0d18] border border-purple-500/10 rounded px-2 py-0.5 min-w-[36px] text-center">${track.key || '—'}</span>
                 <span class="text-[10px] font-bold text-cyan-300 bg-[#0d0d18] border border-cyan-500/10 rounded px-2 py-0.5 min-w-[36px] text-center">${track.bpm || '—'}</span>
+                <span class="text-[10px] font-bold text-[#8a7a60] bg-[#0d0d18] border border-white/[0.06] rounded px-2 py-0.5 min-w-[36px] text-center">${track.releaseYear || '—'}</span>
             </div>
         </div>`
     }).join('') + '</div>'
