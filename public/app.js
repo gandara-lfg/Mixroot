@@ -194,19 +194,19 @@ async function searchRecSongs() {
         'from-emerald-900 to-green-700',
     ]
 
-    container.innerHTML = '<div class="absolute inset-0 flex flex-col gap-1.5 overflow-y-auto pr-0.5">' + tracks.map(function(track, i) {
+    container.innerHTML = '<div class="absolute inset-0 flex flex-col gap-2 overflow-y-auto pr-0.5">' + tracks.map(function(track, i) {
         return `
-        <div class="match-card bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-2 py-1.5 flex items-center gap-2 cursor-pointer transition-all group">
-            <div class="w-7 h-7 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] shrink-0 overflow-hidden">
+        <div class="match-card bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-3 py-2.5 flex items-center gap-3 cursor-pointer transition-all group shrink-0">
+            <div class="w-9 h-9 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-xs shrink-0 overflow-hidden">
                 ${track.image ? '<img src="' + track.image + '" class="w-full h-full object-cover" alt="">' : '♫'}
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold text-white truncate group-hover:text-[#c8a86e] transition-colors">${track.song}</p>
-                <p class="text-[9px] text-[#5a5248] truncate">${track.artist}</p>
+                <p class="text-xs font-semibold text-white truncate group-hover:text-[#c8a86e] transition-colors">${track.song}</p>
+                <p class="text-[10px] text-[#5a5248] truncate mt-0.5">${track.artist}</p>
             </div>
-            <div class="flex gap-1 shrink-0">
-                <span class="text-[8px] font-bold text-purple-300 bg-[#0d0d18] border border-purple-500/10 rounded px-1.5 py-0.5">${track.key || '—'}</span>
-                <span class="text-[8px] font-bold text-cyan-300 bg-[#0d0d18] border border-cyan-500/10 rounded px-1.5 py-0.5">${track.bpm || '—'}</span>
+            <div class="flex flex-col gap-1 shrink-0 items-end">
+                <span class="text-[10px] font-bold text-purple-300 bg-[#0d0d18] border border-purple-500/10 rounded px-2 py-0.5 min-w-[36px] text-center">${track.key || '—'}</span>
+                <span class="text-[10px] font-bold text-cyan-300 bg-[#0d0d18] border border-cyan-500/10 rounded px-2 py-0.5 min-w-[36px] text-center">${track.bpm || '—'}</span>
             </div>
         </div>`
     }).join('') + '</div>'
