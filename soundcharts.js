@@ -72,7 +72,6 @@ async function getRecSongsByGenre(genres, keys) {
 
 async function getRecSongs(keys, offset, year) {
     const dates = getYears(year)
-    console.log('[getRecSongs] year param:', year || 'All Years', '| date range:', dates.start, '→', dates.end)
     const filters = [
         { type: 'metric', data: { platform: 'spotify', metricType: 'streams', min: '1000000' } },
         { type: 'songKey', data: { values: keys, operator: 'in' } },

@@ -124,7 +124,7 @@ app.get('/search', async (req, res) => {
 
     const { key, bpm } = getKeyAndBpm(audio)
 
-    console.log(track.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
+    // console.log(track.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
 
     res.json({
         song: track.name,
@@ -168,7 +168,7 @@ app.get('/artist-songs', async (req, res) => {
         if (scObject && scObject.genres && scObject.genres.length > 0) {
             genre = scObject.genres[0].root
         }
-        console.log(item.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
+        // console.log(item.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
         return { key, bpm, genre }
     }))
 
@@ -218,7 +218,7 @@ app.get('/rec-songs', async (req, res) => {
 
     const year = req.query.year || ''
     const offset = Math.floor(Math.random() * 150)
-    console.log('[rec-songs] deck A key:', key, '| year:', year || 'All Years', '| offset:', offset)
+    // console.log('[rec-songs] deck A key:', key, '| year:', year || 'All Years', '| offset:', offset)
     const data = await getRecSongs(pitchClasses, offset, year)
 
     const allItems = data.items || []
