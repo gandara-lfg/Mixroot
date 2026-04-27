@@ -86,33 +86,10 @@
                     <option>Electronic</option>
                     <option>Hip-Hop</option>
                     <option>Pop</option>
-                    <option>R&amp;B</option>
-                    <option>House</option>
-                    <option>Techno</option>
                     <option>Latin</option>
-                    <option>Ambient</option>
+                    <option>R&amp;B</option>
+                    <option>Dance</option>
                 </select>
-            </div>
-
-            <!-- Hairline -->
-            <div class="w-full h-px bg-white/[0.05]"></div>
-
-            <!-- BPM fader -->
-            <div class="w-full flex flex-col items-center gap-2">
-                <div class="flex justify-between w-full">
-                    <span class="fader-edge-label">60</span>
-                    <span class="fader-center-label">
-                        <span id="bpmMin">100</span>–<span id="bpmMax">160</span><span class="fader-unit"> BPM</span>
-                    </span>
-                    <span class="fader-edge-label">220</span>
-                </div>
-                <div class="bpm-range-wrap w-full">
-                    <div class="bpm-range-track"></div>
-                    <div id="bpmRangeFill" class="bpm-range-fill"></div>
-                    <input id="bpmRangeMin" type="range" min="60" max="220" value="100" class="bpm-fader">
-                    <input id="bpmRangeMax" type="range" min="60" max="220" value="160" class="bpm-fader">
-                </div>
-                <p class="knob-title">BPM Range</p>
             </div>
 
             <!-- Hairline -->
@@ -150,6 +127,27 @@
                     <option value="2010">2010s</option>
                     <option value="2020">2020s</option>
                 </select>
+            </div>
+
+            <!-- Hairline -->
+            <div class="w-full h-px bg-white/[0.05]"></div>
+
+            <!-- BPM fader -->
+            <div class="w-full flex flex-col items-center gap-2">
+                <div class="flex justify-between w-full">
+                    <span class="fader-edge-label">60</span>
+                    <span class="fader-center-label">
+                        <span id="bpmMin">100</span>–<span id="bpmMax">160</span><span class="fader-unit"> BPM</span>
+                    </span>
+                    <span class="fader-edge-label">220</span>
+                </div>
+                <div class="bpm-range-wrap w-full">
+                    <div class="bpm-range-track"></div>
+                    <div id="bpmRangeFill" class="bpm-range-fill"></div>
+                    <input id="bpmRangeMin" type="range" min="60" max="220" value="100" step="5" class="bpm-fader">
+                    <input id="bpmRangeMax" type="range" min="60" max="220" value="160" step="5" class="bpm-fader">
+                </div>
+                <p class="knob-title">BPM Range</p>
             </div>
 
             <!-- Hairline -->

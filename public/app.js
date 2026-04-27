@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let minVal = parseInt(minThumb.value)
         let maxVal = parseInt(maxThumb.value)
 
-        // Keep min from passing max and vice versa
         if (minVal > maxVal) {
             minVal = maxVal
             minThumb.value = minVal
@@ -29,14 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
         minLabel.textContent = minVal
         maxLabel.textContent = maxVal
 
-        // Position the amber fill between the two thumbs
         const leftPct  = ((minVal - RANGE_MIN) / TOTAL) * 100
         const rightPct = ((RANGE_MAX - maxVal)  / TOTAL) * 100
         fill.style.left  = leftPct  + '%'
         fill.style.right = rightPct + '%'
 
-        // Raise the min thumb's z-index when it's pushed to the far right
-        // so the user can always drag it back left
         if (minVal > (RANGE_MAX + RANGE_MIN) / 2) {
             minThumb.style.zIndex = 5
         } else {
@@ -47,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     minThumb.addEventListener('input', updateDisplay)
     maxThumb.addEventListener('input', updateDisplay)
 
-    // Set initial fill position on page load
     updateDisplay()
 })
 
@@ -61,15 +56,15 @@ async function searchSong() {
 
     if (song === '' || artist === '') {
         result.innerHTML = `
-            <div class="neon-card-purple h-full rounded-2xl bg-[#14141f] border border-red-500/30 p-4 flex items-center justify-center">
-                <p class="text-red-400 text-sm font-medium">Please enter both a song and artist.</p>
+            <div class="info-empty h-full rounded-2xl">
+                <p class="info-empty-text" style="color:#c0806a">Please enter both a song and artist.</p>
             </div>`
         return
     }
 
     result.innerHTML = `
-        <div class="neon-card-purple h-full rounded-2xl bg-[#14141f] border border-purple-500/20 p-4 flex items-center justify-center">
-            <span class="loading loading-spinner loading-md text-purple-400"></span>
+        <div class="info-empty h-full rounded-2xl">
+            <span class="loading loading-spinner loading-md" style="color:#c8a86e"></span>
         </div>`
 
     const response = await fetch(
@@ -80,8 +75,8 @@ async function searchSong() {
 
     if (data.error) {
         result.innerHTML = `
-            <div class="neon-card-purple h-full rounded-2xl bg-[#14141f] border border-red-500/30 p-4 flex items-center justify-center">
-                <p class="text-red-400 text-sm font-medium">${data.error}</p>
+            <div class="info-empty h-full rounded-2xl">
+                <p class="info-empty-text" style="color:#c0806a">${data.error}</p>
             </div>`
         return
     }
@@ -89,35 +84,36 @@ async function searchSong() {
     deckAKey = data.key || null
 
     result.innerHTML = `
-        <div class="neon-card-purple h-full rounded-2xl bg-[#14141f] border border-purple-500/20 p-4 flex flex-col justify-between">
+        <div class="h-full rounded-2xl bg-[#0f0d0a] border border-[rgba(200,168,100,0.15)] p-4 flex flex-col justify-between">
             <div class="flex items-center gap-3">
                 <img src="${data.image || ''}" alt="Album"
-                    class="w-14 h-14 rounded-xl object-cover shrink-0 bg-purple-900/40"
+                    class="w-14 h-14 rounded-xl object-cover shrink-0 bg-[#1a1610]"
                     onerror="this.style.display='none'">
                 <div class="min-w-0">
                     <p class="font-bold text-white text-sm leading-tight truncate">${data.song}</p>
-                    <p class="text-xs text-gray-400 truncate">${data.artist}</p>
-                    ${data.album ? `<p class="text-[10px] text-gray-600 mt-0.5 truncate">${data.album}</p>` : ''}
+                    <p class="text-xs truncate" style="color:#6a6258">${data.artist}</p>
+                    ${data.album ? `<p class="text-[10px] mt-0.5 truncate" style="color:#48443a">${data.album}</p>` : ''}
                 </div>
             </div>
             <div class="grid grid-cols-3 gap-2 mt-3">
-                <div class="stat-pill bg-[#0d0d18] rounded-xl p-2 text-center border border-purple-500/10">
-                    <p class="text-[9px] text-gray-500 uppercase tracking-wider">Key</p>
-                    <p class="text-sm font-bold text-purple-300 mt-0.5">${data.key || '—'}</p>
+                <div class="rounded-xl p-2 text-center" style="background:rgba(192,132,252,0.06);border:1px solid rgba(192,132,252,0.15)">
+                    <p class="text-[9px] uppercase tracking-wider" style="color:rgba(192,132,252,0.5)">Key</p>
+                    <p class="text-sm font-bold mt-0.5" style="color:#c084fc">${data.key || '—'}</p>
                 </div>
-                <div class="stat-pill bg-[#0d0d18] rounded-xl p-2 text-center border border-cyan-500/10">
-                    <p class="text-[9px] text-gray-500 uppercase tracking-wider">BPM</p>
-                    <p class="text-sm font-bold text-cyan-300 mt-0.5">${data.bpm || '—'}</p>
+                <div class="rounded-xl p-2 text-center" style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15)">
+                    <p class="text-[9px] uppercase tracking-wider" style="color:rgba(56,189,248,0.5)">BPM</p>
+                    <p class="text-sm font-bold mt-0.5" style="color:#38bdf8">${data.bpm || '—'}</p>
                 </div>
-                <div class="stat-pill bg-[#0d0d18] rounded-xl p-2 text-center border border-pink-500/10">
-                    <p class="text-[9px] text-gray-500 uppercase tracking-wider">Genre</p>
-                    <p class="text-sm font-bold text-pink-300 mt-0.5">${data.genres && data.genres.length > 0 ? data.genres[0] : '—'}</p>
-                    <p class="text-[10px] font-semibold text-pink-300 opacity-60 mt-0.5">${data.genres && data.genres.length > 1 ? data.genres[1] : ''}</p>
+                <div class="rounded-xl p-2 text-center" style="background:rgba(244,114,182,0.06);border:1px solid rgba(244,114,182,0.15)">
+                    <p class="text-[9px] uppercase tracking-wider" style="color:rgba(244,114,182,0.5)">Genre</p>
+                    <p class="text-sm font-bold mt-0.5" style="color:#f472b6">${data.genres && data.genres.length > 0 ? data.genres[0] : '—'}</p>
+                    <p class="text-[10px] font-semibold mt-0.5" style="color:rgba(244,114,182,0.5)">${data.genres && data.genres.length > 1 ? data.genres[1] : ''}</p>
                 </div>
             </div>
             ${data.spotifyUrl ? `
             <a href="${data.spotifyUrl}" target="_blank"
-                class="btn btn-xs btn-outline border-green-500/30 text-green-400 hover:bg-green-900/30 hover:border-green-500 mt-2 rounded-lg font-semibold">
+                class="btn btn-xs btn-outline mt-2 rounded-lg font-semibold"
+                style="border-color:rgba(200,168,100,0.2);color:#c8a86e">
                 Open in Spotify ↗
             </a>` : ''}
         </div>`
@@ -181,7 +177,7 @@ async function searchRecSongs() {
     const tracks = data.tracks
     if (!tracks || tracks.length === 0) {
         container.innerHTML = `
-            <div class="flex items-center justify-center h-full text-gray-600 text-sm">No matches found.</div>`
+            <div class="flex items-center justify-center h-full text-sm" style="color:#5a5248">No matches found.</div>`
         if (countBadge) countBadge.textContent = '0 found'
         return
     }
@@ -196,20 +192,20 @@ async function searchRecSongs() {
         'from-emerald-900 to-green-700',
     ]
 
-    container.innerHTML = '<div class="absolute inset-0 flex flex-col gap-2 overflow-y-auto pr-0.5">' + tracks.map(function(track, i) {
+    container.innerHTML = '<div class="absolute inset-0 flex flex-col gap-1.5 overflow-y-auto pr-0.5">' + tracks.map(function(track, i) {
         return `
-        <div class="match-card bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-3 py-2.5 flex items-center gap-3 cursor-pointer transition-all group shrink-0">
-            <div class="w-9 h-9 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-xs shrink-0 overflow-hidden">
+        <div class="match-card flex items-center gap-2.5 bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-3 py-2 cursor-pointer transition-all group shrink-0">
+            <div class="w-8 h-8 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-xs shrink-0 overflow-hidden">
                 ${track.image ? '<img src="' + track.image + '" class="w-full h-full object-cover" alt="">' : '♫'}
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-white truncate group-hover:text-[#c8a86e] transition-colors">${track.song}</p>
-                <p class="text-[10px] text-[#5a5248] truncate mt-0.5">${track.artist}</p>
+                <p class="text-xs font-semibold truncate group-hover:text-[#c8a86e] transition-colors" style="color:#c8c0b4">${track.song}</p>
+                <p class="text-[10px] truncate mt-0.5" style="color:#5a5248">${track.artist}</p>
             </div>
-            <div class="flex flex-col gap-1 shrink-0 items-end">
-                <span class="text-[10px] font-bold text-purple-300 bg-[#0d0d18] border border-purple-500/10 rounded px-2 py-0.5 min-w-[36px] text-center">${track.key || '—'}</span>
-                <span class="text-[10px] font-bold text-cyan-300 bg-[#0d0d18] border border-cyan-500/10 rounded px-2 py-0.5 min-w-[36px] text-center">${track.bpm || '—'}</span>
-                <span class="text-[10px] font-bold text-[#8a7a60] bg-[#0d0d18] border border-white/[0.06] rounded px-2 py-0.5 min-w-[36px] text-center">${track.releaseYear || '—'}</span>
+            <div class="flex gap-1 shrink-0">
+                <span class="stat-badge stat-key">${track.key || '—'}</span>
+                <span class="stat-badge stat-bpm">${track.bpm || '—'}</span>
+                <span class="stat-badge stat-year">${track.releaseYear || '—'}</span>
             </div>
         </div>`
     }).join('') + '</div>'
@@ -315,14 +311,13 @@ function initDragKnob(knobId, options, selectId, labelId) {
 
 // ─── RENDER RECOMMENDATIONS ─────────────────────────────────────────────────
 
-// Render recommendations — call this when you have match data from the API
 function renderRecommendations(tracks) {
     const container = document.getElementById('recommendations')
     const countBadge = document.getElementById('matchCount')
 
     if (!tracks || tracks.length === 0) {
         container.innerHTML = `
-            <div class="flex items-center justify-center h-full text-gray-600 text-sm">
+            <div class="flex items-center justify-center h-full text-sm" style="color:#5a5248">
                 No matches found.
             </div>`
         if (countBadge) countBadge.textContent = '0 found'
@@ -339,32 +334,21 @@ function renderRecommendations(tracks) {
         'from-emerald-900 to-green-700',
     ]
 
-    container.innerHTML = `<div class="absolute inset-0 flex flex-col gap-2 overflow-y-auto pr-0.5">${tracks.map((track, i) => `
-        <div class="match-card neon-card-cyan bg-[#14141f] border border-cyan-500/15 hover:border-cyan-500/40 rounded-xl p-3 flex flex-col gap-2 cursor-pointer transition-all group">
-            <div class="flex items-center gap-3">
-                <div class="album-thumb w-10 h-10 rounded-lg bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-base shrink-0 overflow-hidden">
-                    ${track.image
-                        ? `<img src="${track.image}" class="w-full h-full object-cover" alt="">`
-                        : '♫'}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-sm text-white truncate group-hover:text-cyan-300 transition-colors">${track.song}</p>
-                    <p class="text-xs text-gray-500 truncate">${track.artist}</p>
-                </div>
+    container.innerHTML = `<div class="absolute inset-0 flex flex-col gap-1.5 overflow-y-auto pr-0.5">${tracks.map((track, i) => `
+        <div class="match-card flex items-center gap-2.5 bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-3 py-2 cursor-pointer transition-all group shrink-0">
+            <div class="w-8 h-8 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                ${track.image
+                    ? `<img src="${track.image}" class="w-full h-full object-cover" alt="">`
+                    : '♫'}
             </div>
-            <div class="grid grid-cols-3 gap-1.5">
-                <div class="stat-pill bg-[#0d0d18] rounded-lg p-1.5 text-center border border-purple-500/10">
-                    <p class="text-[8px] text-gray-500 uppercase tracking-wider">Key</p>
-                    <p class="text-xs font-bold text-purple-300">${track.key || '—'}</p>
-                </div>
-                <div class="stat-pill bg-[#0d0d18] rounded-lg p-1.5 text-center border border-cyan-500/10">
-                    <p class="text-[8px] text-gray-500 uppercase tracking-wider">BPM</p>
-                    <p class="text-xs font-bold text-cyan-300">${track.bpm || '—'}</p>
-                </div>
-                <div class="stat-pill bg-[#0d0d18] rounded-lg p-1.5 text-center border border-pink-500/10">
-                    <p class="text-[8px] text-gray-500 uppercase tracking-wider">Genre</p>
-                    <p class="text-xs font-bold text-pink-300">${track.genre || '—'}</p>
-                </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold truncate group-hover:text-[#c8a86e] transition-colors" style="color:#c8c0b4">${track.song}</p>
+                <p class="text-[10px] truncate mt-0.5" style="color:#5a5248">${track.artist}</p>
+            </div>
+            <div class="flex gap-1 shrink-0">
+                <span class="stat-badge stat-key">${track.key || '—'}</span>
+                <span class="stat-badge stat-bpm">${track.bpm || '—'}</span>
+                <span class="stat-badge stat-genre">${track.genre || '—'}</span>
             </div>
         </div>`
     ).join('')}</div>`
