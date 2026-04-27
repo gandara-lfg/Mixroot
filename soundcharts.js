@@ -70,15 +70,18 @@ async function getRecSongsByGenre(genres, keys) {
     )
 }
 
-async function getRecSongs(keys, offset, year) {
+async function getRecSongs(keys, offset, year, genres) {
     const dates = getYears(year)
     const filters = [
         { type: 'metric', data: { platform: 'spotify', metricType: 'streams', min: '1000000' } },
         { type: 'songKey', data: { values: keys, operator: 'in' } },
-        { type: 'territory', data: { values: ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR'], operator: 'in' } }
+        { type: 'territory', data: { values: ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR'], operator: 'in' } },
     ]
     if (year) {
         filters.splice(1, 0, { type: 'releaseDate', data: { min: dates.start, max: dates.end, operator: 'in' } })
+    }
+    if (genres && genres.length > 0) {
+        filters.splice(1, 0, { type: 'songGenres', data: { values: genres, operator: 'in' } })
     }
     const body = {
         sort: { platform: 'spotify', metricType: 'streams', sortBy: 'total', order: 'desc' },

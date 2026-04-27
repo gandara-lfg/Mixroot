@@ -48,6 +48,15 @@ const HARMONIC_KEYS = {
 // Maps Spotify's numeric key (0-11) to a note name, and adds 'm' if the song is in a minor key
 const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
+const GENRES = {
+    "Electronic": ["electro", "electronic"],
+    "Hip-Hop": ["hip hop", "hip-hop & rap"],
+    "Pop": ["pop"],
+    "Latin": ["latin"],
+    "R&B": ["r&b", "funk & soul", "soul"],
+    "Dance": ["dance"]
+}
+
 function formatKey(keyNum, mode) {
     if (keyNum == null || keyNum < 0) return null
     const noteName = KEY_NAMES[keyNum]
@@ -217,9 +226,11 @@ app.get('/rec-songs', async (req, res) => {
     }
 
     const year = req.query.year || ''
+    const genre = req.query.genre || ''
+    const genreValues = genre && GENRES[genre] ? GENRES[genre] : null
     const offset = Math.floor(Math.random() * 150)
-    // console.log('[rec-songs] deck A key:', key, '| year:', year || 'All Years', '| offset:', offset)
-    const data = await getRecSongs(pitchClasses, offset, year)
+    // console.log('[rec-songs] deck A key:', key, '| year:', year || 'All Years', '| genre:', genre || 'All', '| offset:', offset)
+    const data = await getRecSongs(pitchClasses, offset, year, genreValues)
 
     const allItems = data.items || []
     const items = allItems.filter(function(item) {

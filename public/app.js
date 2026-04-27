@@ -168,7 +168,8 @@ async function searchRecSongs() {
     if (countBadge) countBadge.textContent = ''
 
     const year = document.getElementById('yearFilter').value
-    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year))
+    const genre = document.getElementById('genreFilter').value
+    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year) + '&genre=' + encodeURIComponent(genre))
     const data = await response.json()
 
     if (data.error) {
@@ -233,11 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Electronic',  value: 'Electronic' },
         { label: 'Hip-Hop',     value: 'Hip-Hop' },
         { label: 'Pop',         value: 'Pop' },
-        { label: 'R&B',         value: 'R&B' },
-        { label: 'House',       value: 'House' },
-        { label: 'Techno',      value: 'Techno' },
         { label: 'Latin',       value: 'Latin' },
-        { label: 'Ambient',     value: 'Ambient' },
+        { label: 'R&B',         value: 'R&B' },
+        { label: 'Dance',       value: 'Dance' },
     ]
 
     const sortOptions = [
