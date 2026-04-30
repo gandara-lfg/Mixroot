@@ -6,8 +6,8 @@ app.use(express.static('public'))
 app.use(express.json())
 
 // Import helper functions for talking to Spotify and Soundcharts
-const { searchSong, searchArtist } = require('./spotify')
-const { getSongByUuid, getSongBySpotifyId, getArtistSongs, getArtistBySpotifyId, getRecSongs } = require('./soundcharts')
+const { searchSong } = require('./spotify')
+const { getSongByUuid, getSongBySpotifyId, getRecSongs } = require('./soundcharts')
 
 // Maps key strings (as returned by formatKey) to Soundcharts pitch class integers (0–11)
 const KEY_TO_PITCH = {
@@ -148,56 +148,60 @@ app.get('/search', async (req, res) => {
     })
 })
 
-// Route: Search for an artist and return their top 10 songs by Spotify popularity
-app.get('/artist-songs', async (req, res) => {
-    const artist = req.query.artist
-    if (!artist) return res.json({ error: 'Missing artist' })
-
-    const searchData = await searchArtist(artist)
-    if (!searchData.artists || searchData.artists.items.length === 0) {
-        return res.json({ error: 'Artist not found' })
-    }
-
-    const spotifyArtistId = searchData.artists.items[0].id
-    const scArtist = await getArtistBySpotifyId(spotifyArtistId)
-
-    if (!scArtist.object || !scArtist.object.uuid) {
-        return res.json({ error: 'Artist not found in Soundcharts' })
-    }
-
-    const songsData = await getArtistSongs(scArtist.object.uuid)
-    const items = songsData.items || []
-
-    const songDetails = await Promise.all(items.map(async function(item) {
-        const songData = await getSongByUuid(item.uuid)
-        const scObject = songData.object || null
-        const audio = scObject ? scObject.audio : null
-        const { key, bpm } = getKeyAndBpm(audio)
-        let genre = null
-        if (scObject && scObject.genres && scObject.genres.length > 0) {
-            genre = scObject.genres[0].root
-        }
-        // console.log(item.name, '| key:', key, '| bpm:', bpm, '| genre:', genre)
-        return { key, bpm, genre }
-    }))
-
-    const tracks = []
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i]
-        const details = songDetails[i]
-        tracks.push({
-            song: item.name,
-            artist: searchData.artists.items[0].name,
-            image: item.imageUrl || null,
-            popularity: item.spotifyPopularity || null,
-            key: details.key,
-            bpm: details.bpm,
-            genre: details.genre
-        })
-    }
-    
-    res.json({ tracks })
-})
+// ─────────────────────────────────────────────────────────────────────────────
+// ARTIST TAB — commented out while the Artist tab is hidden from the UI.
+// This route searches Spotify for an artist, looks them up in Soundcharts,
+// fetches their top songs, and returns key/bpm/genre for each track.
+// Re-enable by uncommenting this route and restoring the Artist tab in the HTML.
+// ─────────────────────────────────────────────────────────────────────────────
+// app.get('/artist-songs', async (req, res) => {
+//     const artist = req.query.artist
+//     if (!artist) return res.json({ error: 'Missing artist' })
+//
+//     const searchData = await searchArtist(artist)
+//     if (!searchData.artists || searchData.artists.items.length === 0) {
+//         return res.json({ error: 'Artist not found' })
+//     }
+//
+//     const spotifyArtistId = searchData.artists.items[0].id
+//     const scArtist = await getArtistBySpotifyId(spotifyArtistId)
+//
+//     if (!scArtist.object || !scArtist.object.uuid) {
+//         return res.json({ error: 'Artist not found in Soundcharts' })
+//     }
+//
+//     const songsData = await getArtistSongs(scArtist.object.uuid)
+//     const items = songsData.items || []
+//
+//     const songDetails = await Promise.all(items.map(async function(item) {
+//         const songData = await getSongByUuid(item.uuid)
+//         const scObject = songData.object || null
+//         const audio = scObject ? scObject.audio : null
+//         const { key, bpm } = getKeyAndBpm(audio)
+//         let genre = null
+//         if (scObject && scObject.genres && scObject.genres.length > 0) {
+//             genre = scObject.genres[0].root
+//         }
+//         return { key, bpm, genre }
+//     }))
+//
+//     const tracks = []
+//     for (let i = 0; i < items.length; i++) {
+//         const item = items[i]
+//         const details = songDetails[i]
+//         tracks.push({
+//             song: item.name,
+//             artist: searchData.artists.items[0].name,
+//             image: item.imageUrl || null,
+//             popularity: item.spotifyPopularity || null,
+//             key: details.key,
+//             bpm: details.bpm,
+//             genre: details.genre
+//         })
+//     }
+//
+//     res.json({ tracks })
+// })
 
 // Route: Return top songs that are harmonically compatible with a given key
 app.get('/rec-songs', async (req, res) => {

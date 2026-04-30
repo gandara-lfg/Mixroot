@@ -540,6 +540,54 @@ html, body {
 }
 
 /* ─────────────────────────────────────────
+   MAP BUTTON + MODAL
+───────────────────────────────────────── */
+
+.map-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #6a6258;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.map-btn:hover {
+    color: #c8a86e;
+    border-color: rgba(200,168,100,0.25);
+    background: rgba(200,168,100,0.04);
+}
+
+.map-modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: transparent;
+    color: #5a5248;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.map-modal-close:hover {
+    color: #c8a86e;
+    border-color: rgba(200,168,100,0.25);
+}
+
+/* ─────────────────────────────────────────
    SONG CARDS — stat badge
 ───────────────────────────────────────── */
 

@@ -6,7 +6,10 @@
     <title>Mixroot</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@3/dist/full.min.css" rel="stylesheet">    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="style.css">
     <script src="app.js" defer></script>
 </head>
@@ -80,7 +83,6 @@
                 </div>
                 <p class="knob-title">Genre</p>
                 <p id="genreLabel" class="knob-value">All Genres</p>
-                <!-- Hidden select kept for JS compatibility -->
                 <select id="genreFilter" class="hidden">
                     <option value="">All Genres</option>
                     <option>Electronic</option>
@@ -102,7 +104,6 @@
                 </div>
                 <p class="knob-title">Sort By</p>
                 <p id="sortLabel" class="knob-value">Key Match</p>
-                <!-- Hidden select kept for JS compatibility -->
                 <select id="sortBy" class="hidden">
                     <option>Key Match</option>
                 </select>
@@ -170,9 +171,19 @@
         <!-- ══ RIGHT DECK ══ -->
         <section class="deck-panel flex-1 min-h-0 flex flex-col items-center gap-3 px-5 py-4 border-l border-white/[0.04]">
 
-            <div class="flex items-center gap-2 self-start">
-                <div class="deck-dot"></div>
-                <span class="deck-label-text">Deck B</span>
+            <div class="flex items-center justify-between w-full shrink-0">
+                <div class="flex items-center gap-2">
+                    <div class="deck-dot"></div>
+                    <span class="deck-label-text">Deck B</span>
+                </div>
+                <button onclick="openMapModal()" class="map-btn">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                    Regions
+                </button>
             </div>
 
             <!-- Platter -->
@@ -188,37 +199,8 @@
                 </div>
             </div>
 
-            <!-- Deck B Tabs -->
-            <div class="deck-tabs w-full shrink-0">
-                <button class="deck-tab deck-tab-active" data-tab="artist" onclick="switchDeckTab('artist')">Artist</button>
-                <button class="deck-tab" data-tab="discover" onclick="switchDeckTab('discover')">Discover</button>
-            </div>
-
-            <!-- Tab: Artist Search -->
-            <div id="deck-tab-artist" class="w-full flex flex-col gap-3 flex-1 min-h-0">
-                <div class="flex gap-2 w-full shrink-0">
-                    <input id="artistSearchInput" type="text" placeholder="Artist…"
-                        class="search-input flex-1 min-w-0"
-                        onkeydown="if(event.key==='Enter') searchArtistSongs()">
-                    <button onclick="searchArtistSongs()" class="search-btn">Search</button>
-                </div>
-                <div class="flex items-center justify-between w-full px-1 shrink-0">
-                    <span class="deck-label-text">Top Songs</span>
-                    <span id="matchCount" class="text-[9px] font-semibold text-[#8a7a60] tracking-wider"></span>
-                </div>
-                <div id="recommendations" class="w-full flex-1 min-h-0 relative">
-                    <div class="info-empty h-full">
-                        <svg class="w-5 h-5 text-[#332f28] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                        </svg>
-                        <p class="info-empty-text">Search an artist to see their top songs</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab: Discover -->
-            <div id="deck-tab-discover" class="w-full flex flex-col gap-3 flex-1 min-h-0 hidden">
+            <!-- Discover -->
+            <div class="w-full flex flex-col gap-3 flex-1 min-h-0">
                 <button onclick="searchRecSongs()" class="search-btn w-full shrink-0">Find Harmonic Matches</button>
                 <div class="flex items-center justify-between w-full px-1 shrink-0">
                     <span class="deck-label-text">Harmonic Matches</span>
@@ -235,6 +217,29 @@
 
     </main>
 
+    <!-- ════ MAP MODAL ════ -->
+    <div id="mapModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0" onclick="closeMapModal()"
+            style="background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)"></div>
+        <!-- Panel -->
+        <div class="relative flex flex-col rounded-2xl overflow-hidden"
+            style="width:78%;max-width:920px;height:68vh;background:#0d0b08;border:1px solid rgba(200,168,100,0.14);box-shadow:0 32px 100px rgba(0,0,0,0.95)">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 py-3.5 shrink-0"
+                style="background:#0f0d0a;border-bottom:1px solid rgba(255,255,255,0.05)">
+                <div>
+                    <p style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#c8c0b4;letter-spacing:-0.02em">Select Regions</p>
+                    <p style="font-size:9px;color:#48443a;margin-top:3px;font-weight:500;letter-spacing:0.05em">Choose territories to filter harmonic matches by country</p>
+                </div>
+                <button onclick="closeMapModal()" class="map-modal-close">✕</button>
+            </div>
+            <!-- Map -->
+            <div class="flex-1 relative overflow-hidden">
+                <div id="regionMap" style="position:absolute;inset:0;background:#0a0908"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- In Development badge -->
     <div style="position:fixed;bottom:12px;right:14px;background:rgba(255,160,0,0.08);border:1px solid rgba(255,160,0,0.18);border-radius:6px;padding:3px 8px;pointer-events:none;z-index:9999;">

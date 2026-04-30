@@ -119,31 +119,37 @@ async function searchSong() {
         </div>`
 }
 
-async function searchArtistSongs() {
-    const input = document.getElementById('artistSearchInput')
-    const container = document.getElementById('recommendations')
-    const countBadge = document.getElementById('matchCount')
-
-    const artist = input.value.trim()
-    if (!artist) return
-
-    container.innerHTML = `
-        <div class="flex items-center justify-center h-full">
-            <span class="loading loading-spinner loading-md" style="color:#c8a86e"></span>
-        </div>`
-    if (countBadge) countBadge.textContent = ''
-
-    const response = await fetch(`/artist-songs?artist=${encodeURIComponent(artist)}`)
-    const data = await response.json()
-
-    if (data.error) {
-        container.innerHTML = `
-            <div class="flex items-center justify-center h-full text-sm" style="color:#c0806a">${data.error}</div>`
-        return
-    }
-
-    renderRecommendations(data.tracks)
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// ARTIST TAB — commented out while the Artist tab is hidden from the UI.
+// searchArtistSongs fetches top songs for a given artist and renders them as
+// match cards in the #recommendations container.
+// Re-enable by restoring the Artist tab in index.html and uncommenting below.
+// ─────────────────────────────────────────────────────────────────────────────
+// async function searchArtistSongs() {
+//     const input = document.getElementById('artistSearchInput')
+//     const container = document.getElementById('recommendations')
+//     const countBadge = document.getElementById('matchCount')
+//
+//     const artist = input.value.trim()
+//     if (!artist) return
+//
+//     container.innerHTML = `
+//         <div class="flex items-center justify-center h-full">
+//             <span class="loading loading-spinner loading-md" style="color:#c8a86e"></span>
+//         </div>`
+//     if (countBadge) countBadge.textContent = ''
+//
+//     const response = await fetch(`/artist-songs?artist=${encodeURIComponent(artist)}`)
+//     const data = await response.json()
+//
+//     if (data.error) {
+//         container.innerHTML = `
+//             <div class="flex items-center justify-center h-full text-sm" style="color:#c0806a">${data.error}</div>`
+//         return
+//     }
+//
+//     renderRecommendations(data.tracks)
+// }
 
 async function searchRecSongs() {
     const container = document.getElementById('rec-results')
@@ -213,16 +219,65 @@ async function searchRecSongs() {
     }).join('') + '</div>'
 }
 
-// ─── DECK B TAB SWITCHING ───────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ARTIST TAB — Tab switcher, also commented out with the Artist tab.
+// Re-enable alongside searchArtistSongs and renderRecommendations below.
+// ─────────────────────────────────────────────────────────────────────────────
+// function switchDeckTab(tab) {
+//     const tabs = ['artist', 'discover']
+//     tabs.forEach(function(t) {
+//         document.getElementById('deck-tab-' + t).classList.toggle('hidden', t !== tab)
+//         const btn = document.querySelector('[data-tab="' + t + '"]')
+//         if (btn) btn.classList.toggle('deck-tab-active', t === tab)
+//     })
+// }
 
-function switchDeckTab(tab) {
-    const tabs = ['artist', 'discover']
-    tabs.forEach(function(t) {
-        document.getElementById('deck-tab-' + t).classList.toggle('hidden', t !== tab)
-        const btn = document.querySelector('[data-tab="' + t + '"]')
-        if (btn) btn.classList.toggle('deck-tab-active', t === tab)
-    })
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// ARTIST TAB — Renders a list of artist tracks into the #recommendations panel.
+// Re-enable alongside searchArtistSongs and switchDeckTab above.
+// ─────────────────────────────────────────────────────────────────────────────
+// function renderRecommendations(tracks) {
+//     const container = document.getElementById('recommendations')
+//     const countBadge = document.getElementById('matchCount')
+//
+//     if (!tracks || tracks.length === 0) {
+//         container.innerHTML = `
+//             <div class="flex items-center justify-center h-full text-sm" style="color:#5a5248">
+//                 No matches found.
+//             </div>`
+//         if (countBadge) countBadge.textContent = '0 found'
+//         return
+//     }
+//
+//     if (countBadge) countBadge.textContent = `${tracks.length} found`
+//
+//     const colors = [
+//         'from-cyan-900 to-teal-700',
+//         'from-violet-900 to-indigo-700',
+//         'from-pink-900 to-rose-700',
+//         'from-amber-900 to-orange-700',
+//         'from-emerald-900 to-green-700',
+//     ]
+//
+//     container.innerHTML = `<div class="absolute inset-0 flex flex-col gap-1.5 overflow-y-auto pr-0.5">${tracks.map((track, i) => `
+//         <div class="match-card flex items-center gap-2.5 bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-3 py-2 cursor-pointer transition-all group shrink-0">
+//             <div class="w-8 h-8 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-xs shrink-0 overflow-hidden">
+//                 ${track.image
+//                     ? `<img src="${track.image}" class="w-full h-full object-cover" alt="">`
+//                     : '♫'}
+//             </div>
+//             <div class="flex-1 min-w-0">
+//                 <p class="text-xs font-semibold truncate group-hover:text-[#c8a86e] transition-colors" style="color:#c8c0b4">${track.song}</p>
+//                 <p class="text-[10px] truncate mt-0.5" style="color:#5a5248">${track.artist}</p>
+//             </div>
+//             <div class="flex gap-1 shrink-0">
+//                 <span class="stat-badge stat-key">${track.key || '—'}</span>
+//                 <span class="stat-badge stat-bpm">${track.bpm || '—'}</span>
+//                 <span class="stat-badge stat-genre">${track.genre || '—'}</span>
+//             </div>
+//         </div>`
+//     ).join('')}</div>`
+// }
 
 // ─── DRAGGABLE KNOBS ────────────────────────────────────────────────────────
 
@@ -311,47 +366,26 @@ function initDragKnob(knobId, options, selectId, labelId) {
     commit(0)
 }
 
-// ─── RENDER RECOMMENDATIONS ─────────────────────────────────────────────────
+// ─── MAP MODAL ──────────────────────────────────────────────────────────────
 
-function renderRecommendations(tracks) {
-    const container = document.getElementById('recommendations')
-    const countBadge = document.getElementById('matchCount')
+let regionMap = null
 
-    if (!tracks || tracks.length === 0) {
-        container.innerHTML = `
-            <div class="flex items-center justify-center h-full text-sm" style="color:#5a5248">
-                No matches found.
-            </div>`
-        if (countBadge) countBadge.textContent = '0 found'
-        return
+function openMapModal() {
+    document.getElementById('mapModal').classList.remove('hidden')
+    if (regionMap === null) {
+        regionMap = L.map('regionMap', {
+            zoomControl: false,
+            attributionControl: false,
+            minZoom: 2,
+            maxZoom: 6
+        }).setView([20, 0], 2)
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd'
+        }).addTo(regionMap)
     }
+}
 
-    if (countBadge) countBadge.textContent = `${tracks.length} found`
-
-    const colors = [
-        'from-cyan-900 to-teal-700',
-        'from-violet-900 to-indigo-700',
-        'from-pink-900 to-rose-700',
-        'from-amber-900 to-orange-700',
-        'from-emerald-900 to-green-700',
-    ]
-
-    container.innerHTML = `<div class="absolute inset-0 flex flex-col gap-1.5 overflow-y-auto pr-0.5">${tracks.map((track, i) => `
-        <div class="match-card flex items-center gap-2.5 bg-[#111009] border border-white/[0.05] hover:border-[rgba(200,168,100,0.2)] rounded-lg px-3 py-2 cursor-pointer transition-all group shrink-0">
-            <div class="w-8 h-8 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-xs shrink-0 overflow-hidden">
-                ${track.image
-                    ? `<img src="${track.image}" class="w-full h-full object-cover" alt="">`
-                    : '♫'}
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold truncate group-hover:text-[#c8a86e] transition-colors" style="color:#c8c0b4">${track.song}</p>
-                <p class="text-[10px] truncate mt-0.5" style="color:#5a5248">${track.artist}</p>
-            </div>
-            <div class="flex gap-1 shrink-0">
-                <span class="stat-badge stat-key">${track.key || '—'}</span>
-                <span class="stat-badge stat-bpm">${track.bpm || '—'}</span>
-                <span class="stat-badge stat-genre">${track.genre || '—'}</span>
-            </div>
-        </div>`
-    ).join('')}</div>`
+function closeMapModal() {
+    document.getElementById('mapModal').classList.add('hidden')
 }
