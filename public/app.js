@@ -368,22 +368,97 @@ function initDragKnob(knobId, options, selectId, labelId) {
 
 // ─── MAP MODAL ──────────────────────────────────────────────────────────────
 
-let regionMap = null
+let regionMap        = null
+let mapInitializing  = false
+let hoveredContinent = null
+
+const selectedContinents = new Set()
+const continentLayers    = {}
+
+const STYLE_DEFAULT  = { color: 'rgba(255,255,255,0.15)', weight: 0.5, fillColor: 'rgba(200,168,100,0.06)', fillOpacity: 1 }
+const STYLE_HOVER    = { color: 'rgba(200,168,100,0.70)', weight: 1,   fillColor: 'rgba(200,168,100,0.20)', fillOpacity: 1 }
+const STYLE_SELECTED = { color: 'rgba(192,132,252,0.80)', weight: 1.5, fillColor: 'rgba(192,132,252,0.22)', fillOpacity: 1 }
+const STYLE_SEL_HOV  = { color: 'rgba(192,132,252,1.00)', weight: 2,   fillColor: 'rgba(192,132,252,0.34)', fillOpacity: 1 }
+
+function styleFor(name, hovering) {
+    const selected = selectedContinents.has(name)
+    if (selected && hovering) return STYLE_SEL_HOV
+    if (selected)             return STYLE_SELECTED
+    if (hovering)             return STYLE_HOVER
+    return STYLE_DEFAULT
+}
+
+function paintContinent(name, hovering) {
+    const layers = continentLayers[name]
+    if (!layers) return
+    const style = styleFor(name, hovering)
+    for (let i = 0; i < layers.length; i++) {
+        layers[i].setStyle(style)
+    }
+}
+
+function setHover(name) {
+    if (hoveredContinent === name) return
+    if (hoveredContinent !== null) paintContinent(hoveredContinent, false)
+    hoveredContinent = name
+    if (name !== null) paintContinent(name, true)
+}
 
 function openMapModal() {
     document.getElementById('mapModal').classList.remove('hidden')
-    if (regionMap === null) {
+    if (regionMap !== null || mapInitializing) return
+    mapInitializing = true
+
+    // Give the browser one frame to render the modal before Leaflet measures the container
+    setTimeout(function() {
         regionMap = L.map('regionMap', {
             zoomControl: false,
             attributionControl: false,
             minZoom: 2,
-            maxZoom: 6
+            maxZoom: 5
         }).setView([20, 0], 2)
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        // dark_nolabels: solid dark tiles — no roads, cities, or text cluttering the view
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd'
         }).addTo(regionMap)
-    }
+
+        // Natural Earth 110m countries — small file, has CONTINENT property on each feature
+        fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+            .then(function(r) { return r.json() })
+            .then(function(data) {
+                L.geoJSON(data, {
+                    style: function() { return STYLE_DEFAULT },
+                    onEachFeature: function(feature, layer) {
+                        let continent = feature.properties.CONTINENT || 'Unknown'
+                        // Natural Earth places Russia in Europe; override to Asia
+                        if (feature.properties.ISO_A3 === 'RUS') continent = 'Asia'
+
+                        if (!continentLayers[continent]) {
+                            continentLayers[continent] = []
+                        }
+                        continentLayers[continent].push(layer)
+
+                        layer.bindTooltip(continent, {
+                            sticky: true,
+                            className: 'continent-tooltip'
+                        })
+
+                        layer.on('mouseover', function() { setHover(continent) })
+                        layer.on('mouseout',  function() { setHover(null) })
+
+                        layer.on('click', function() {
+                            if (selectedContinents.has(continent)) {
+                                selectedContinents.delete(continent)
+                            } else {
+                                selectedContinents.add(continent)
+                            }
+                            paintContinent(continent, hoveredContinent === continent)
+                        })
+                    }
+                }).addTo(regionMap)
+            })
+    }, 50)
 }
 
 function closeMapModal() {
