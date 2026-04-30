@@ -227,10 +227,15 @@ app.get('/rec-songs', async (req, res) => {
 
     const year = req.query.year || ''
     const genre = req.query.genre || ''
-    const genreValues = genre && GENRES[genre] ? GENRES[genre] : null
+    const genreValues = GENRES[genre] || null
+    const bpmMin = parseInt(req.query.bpmMin)
+    const bpmMax = parseInt(req.query.bpmMax)
+    let bpm = null
+    if (!isNaN(bpmMin) && !isNaN(bpmMax)) {
+        bpm = { min: bpmMin, max: bpmMax }
+    }
     const offset = Math.floor(Math.random() * 150)
-    // console.log('[rec-songs] deck A key:', key, '| year:', year || 'All Years', '| genre:', genre || 'All', '| offset:', offset)
-    const data = await getRecSongs(pitchClasses, offset, year, genreValues)
+    const data = await getRecSongs(pitchClasses, offset, year, genreValues, bpm)
 
     const allItems = data.items || []
     const items = allItems.filter(function(item) {

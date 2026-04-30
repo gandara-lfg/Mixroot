@@ -165,7 +165,9 @@ async function searchRecSongs() {
 
     const year = document.getElementById('yearFilter').value
     const genre = document.getElementById('genreFilter').value
-    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year) + '&genre=' + encodeURIComponent(genre))
+    const bpmMin = document.getElementById('bpmRangeMin').value
+    const bpmMax = document.getElementById('bpmRangeMax').value
+    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year) + '&genre=' + encodeURIComponent(genre) + '&bpmMin=' + bpmMin + '&bpmMax=' + bpmMax)
     const data = await response.json()
 
     if (data.error) {

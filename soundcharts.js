@@ -70,7 +70,7 @@ async function getRecSongsByGenre(genres, keys) {
     )
 }
 
-async function getRecSongs(keys, offset, year, genres) {
+async function getRecSongs(keys, offset, year, genres, bpm) {
     const dates = getYears(year)
     const filters = [
         { type: 'metric', data: { platform: 'spotify', metricType: 'streams', min: '1000000' } },
@@ -82,6 +82,9 @@ async function getRecSongs(keys, offset, year, genres) {
     }
     if (genres && genres.length > 0) {
         filters.splice(1, 0, { type: 'songGenres', data: { values: genres, operator: 'in' } })
+    }
+    if (bpm) {
+        filters.push({ type: 'tempo', data: { min: bpm.min, max: bpm.max } })
     }
     const body = {
         sort: { platform: 'spotify', metricType: 'streams', sortBy: 'total', order: 'desc' },
