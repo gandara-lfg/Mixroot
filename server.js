@@ -54,7 +54,8 @@ const GENRES = {
     "Pop": ["pop"],
     "Latin": ["latin"],
     "R&B": ["r&b", "funk & soul", "soul"],
-    "Dance": ["dance"]
+    "Dance": ["edm", "dance"],
+    "Rock": ["rock", "metal"]
 }
 
 function formatKey(keyNum, mode) {

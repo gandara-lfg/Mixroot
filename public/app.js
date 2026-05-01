@@ -290,6 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Latin',       value: 'Latin' },
         { label: 'R&B',         value: 'R&B' },
         { label: 'Dance',       value: 'Dance' },
+        { label: 'Rock',        value: 'Rock' }
     ]
 
     const sortOptions = [
