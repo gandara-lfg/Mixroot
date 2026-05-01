@@ -7,7 +7,7 @@ app.use(express.json())
 
 // Import helper functions for talking to Spotify and Soundcharts
 const { searchSong } = require('./spotify')
-const { getSongByUuid, getSongBySpotifyId, getRecSongs } = require('./soundcharts')
+const { getSongByUuid, getSongBySpotifyId, getRecSongs, DEFAULT_TERRITORIES } = require('./soundcharts')
 
 // Maps key strings (as returned by formatKey) to Soundcharts pitch class integers (0–11)
 const KEY_TO_PITCH = {
@@ -239,8 +239,13 @@ app.get('/rec-songs', async (req, res) => {
     if (!isNaN(bpmMin) && !isNaN(bpmMax)) {
         bpm = { min: bpmMin, max: bpmMax }
     }
+    const territoriesRaw = req.query.territories || ''
+    let territories = null
+    if (territoriesRaw) {
+        territories = territoriesRaw.split(',').filter(function(t) { return t.length > 0 })
+    }
     const offset = Math.floor(Math.random() * 150)
-    const data = await getRecSongs(pitchClasses, offset, year, genreValues, bpm)
+    const data = await getRecSongs(pitchClasses, offset, year, genreValues, bpm, territories)
 
     const allItems = data.items || []
     const items = allItems.filter(function(item) {

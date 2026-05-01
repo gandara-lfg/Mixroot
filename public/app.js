@@ -173,7 +173,10 @@ async function searchRecSongs() {
     const genre = document.getElementById('genreFilter').value
     const bpmMin = document.getElementById('bpmRangeMin').value
     const bpmMax = document.getElementById('bpmRangeMax').value
-    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year) + '&genre=' + encodeURIComponent(genre) + '&bpmMin=' + bpmMin + '&bpmMax=' + bpmMax)
+
+    const territoriesParam = selectedTerritories.length > 0 ? '&territories=' + selectedTerritories.join(',') : ''
+
+    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year) + '&genre=' + encodeURIComponent(genre) + '&bpmMin=' + bpmMin + '&bpmMax=' + bpmMax + territoriesParam)
     const data = await response.json()
 
     if (data.error) {
@@ -369,12 +372,47 @@ function initDragKnob(knobId, options, selectId, labelId) {
 
 // ─── MAP MODAL ──────────────────────────────────────────────────────────────
 
+const CONTINENT_COUNTRIES = {
+    'Africa': [
+        'DZ','AO','BJ','BW','BF','BI','CM','CV','CF','TD','KM','CD','CG','CI','DJ',
+        'EG','GQ','ER','SZ','ET','GA','GM','GH','GN','GW','KE','LS','LR','LY','MG',
+        'MW','ML','MR','MU','MA','MZ','NA','NE','NG','RW','ST','SN','SC','SL','SO',
+        'ZA','SS','SD','TZ','TG','TN','UG','ZM','ZW','EH','RE','YT','SH','IO','TF','BV'
+    ],
+    'Antarctica': ['AQ'],
+    'Asia': [
+        'AF','AM','AZ','BH','BD','BT','BN','KH','CN','CY','GE','HK','IN','ID','IR',
+        'IQ','IL','JP','JO','KZ','KW','KG','LA','LB','MO','MY','MV','MN','MM','NP',
+        'KP','OM','PK','PS','PH','QA','RU','SA','SG','KR','LK','SY','TW','TJ','TH',
+        'TL','TR','TM','AE','UZ','VN','YE','CC','CX'
+    ],
+    'Europe': [
+        'AL','AD','AT','BY','BE','BA','BG','HR','CZ','DK','EE','FI','FR','DE','GR',
+        'HU','IS','IE','IT','XK','LV','LI','LT','LU','MT','MD','MC','ME','NL','MK',
+        'NO','PL','PT','RO','SM','RS','SK','SI','ES','SE','CH','UA','GB','VA','AX',
+        'FO','GI','GG','IM','JE','SJ'
+    ],
+    'North America': [
+        'AG','BS','BB','BZ','CA','CR','CU','DM','DO','SV','GD','GT','HT','HN','JM',
+        'MX','NI','PA','KN','LC','VC','TT','US','AI','AW','BM','BQ','VG','KY','CW',
+        'GL','GP','MQ','MS','PR','BL','MF','SX','TC','VI','PM'
+    ],
+    'South America': [
+        'AR','BO','BR','CL','CO','EC','GY','PY','PE','SR','UY','VE','FK','GF','GS'
+    ],
+    'Oceania': [
+        'AU','FJ','KI','MH','FM','NR','NZ','PW','PG','WS','SB','TO','TV','VU','CK',
+        'NU','AS','GU','MP','PF','NC','WF','TK','NF','PN','UM','HM'
+    ],
+}
+
 let regionMap        = null
 let mapInitializing  = false
 let hoveredContinent = null
 
 const selectedContinents = new Set()
 const continentLayers    = {}
+let selectedTerritories  = []
 
 const STYLE_DEFAULT  = { color: 'rgba(255,255,255,0.15)', weight: 0.5, fillColor: 'rgba(200,168,100,0.06)', fillOpacity: 1 }
 const STYLE_HOVER    = { color: 'rgba(200,168,100,0.70)', weight: 1,   fillColor: 'rgba(200,168,100,0.20)', fillOpacity: 1 }
@@ -455,6 +493,16 @@ function openMapModal() {
                                 selectedContinents.add(continent)
                             }
                             paintContinent(continent, hoveredContinent === continent)
+
+                            selectedTerritories = []
+                            selectedContinents.forEach(function(c) {
+                                const codes = CONTINENT_COUNTRIES[c] || []
+                                for (let j = 0; j < codes.length; j++) {
+                                    if (selectedTerritories.indexOf(codes[j]) === -1) {
+                                        selectedTerritories.push(codes[j])
+                                    }
+                                }
+                            })
                         })
                     }
                 }).addTo(regionMap)

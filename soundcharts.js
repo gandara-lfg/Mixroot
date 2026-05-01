@@ -70,12 +70,18 @@ async function getRecSongsByGenre(genres, keys) {
     )
 }
 
-async function getRecSongs(keys, offset, year, genres, bpm) {
+const DEFAULT_TERRITORIES = ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR']
+
+async function getRecSongs(keys, offset, year, genres, bpm, territories) {
     const dates = getYears(year)
+    let territoryValues = DEFAULT_TERRITORIES
+    if (territories && territories.length > 0) {
+        territoryValues = territories
+    }
     const filters = [
         { type: 'metric', data: { platform: 'spotify', metricType: 'streams', min: '1000000' } },
         { type: 'songKey', data: { values: keys, operator: 'in' } },
-        { type: 'territory', data: { values: ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR'], operator: 'in' } },
+        { type: 'isrcCountryCode', data: { values: territoryValues, operator: 'in' } },
     ]
     if (year) {
         filters.splice(1, 0, { type: 'releaseDate', data: { min: dates.start, max: dates.end, operator: 'in' } })
@@ -122,4 +128,4 @@ function getYears(year) {
     return { start: start, end: end }
 }
 
-module.exports = { getSongByUuid, getSongBySpotifyId, getRecSongs }
+module.exports = { getSongByUuid, getSongBySpotifyId, getRecSongs, DEFAULT_TERRITORIES }
