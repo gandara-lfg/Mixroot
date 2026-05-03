@@ -72,7 +72,7 @@ async function getRecSongsByGenre(genres, keys) {
 
 const DEFAULT_TERRITORIES = ['US', 'MX', 'CO', 'AR', 'CL', 'PE', 'VE', 'EC', 'DO', 'PA', 'CR', 'GT', 'HN', 'SV', 'NI', 'BO', 'PY', 'UY', 'CU', 'PR']
 
-async function getRecSongs(keys, offset, year, genres, bpm, territories) {
+async function getRecSongs(keys, offset, year, genres, bpm, territories, languages) {
     const dates = getYears(year)
     let territoryValues = DEFAULT_TERRITORIES
     if (territories && territories.length > 0) {
@@ -91,6 +91,9 @@ async function getRecSongs(keys, offset, year, genres, bpm, territories) {
     }
     if (bpm) {
         filters.push({ type: 'tempo', data: { min: bpm.min, max: bpm.max } })
+    }
+    if (languages && languages.length > 0) {
+        filters.push({ type: 'languageCode', data: { values: languages, operator: 'in' } })
     }
     const body = {
         sort: { platform: 'spotify', metricType: 'streams', sortBy: 'total', order: 'desc' },

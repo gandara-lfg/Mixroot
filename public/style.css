@@ -543,6 +543,50 @@ html, body {
    MAP BUTTON + MODAL
 ───────────────────────────────────────── */
 
+.modal-tab {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #48443a;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid transparent;
+    padding: 2px 0 4px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+.modal-tab:hover { color: #8a7a60; }
+.modal-tab-active {
+    color: #c8a86e;
+    border-bottom-color: #c8a86e;
+}
+
+.lang-pill {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #5a5248;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.lang-pill:hover {
+    color: #c8a86e;
+    border-color: rgba(200,168,100,0.28);
+    background: rgba(200,168,100,0.04);
+}
+.lang-pill-active {
+    color: #c084fc;
+    background: rgba(192,132,252,0.08);
+    border-color: rgba(192,132,252,0.32);
+}
+
 .map-btn {
     display: flex;
     align-items: center;

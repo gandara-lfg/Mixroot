@@ -244,8 +244,13 @@ app.get('/rec-songs', async (req, res) => {
     if (territoriesRaw) {
         territories = territoriesRaw.split(',').filter(function(t) { return t.length > 0 })
     }
+    const languagesRaw = req.query.languages || ''
+    let languages = null
+    if (languagesRaw) {
+        languages = languagesRaw.split(',').filter(function(l) { return l.length > 0 })
+    }
     const offset = Math.floor(Math.random() * 150)
-    const data = await getRecSongs(pitchClasses, offset, year, genreValues, bpm, territories)
+    const data = await getRecSongs(pitchClasses, offset, year, genreValues, bpm, territories, languages)
 
     const allItems = data.items || []
     const items = allItems.filter(function(item) {

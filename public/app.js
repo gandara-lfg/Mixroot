@@ -176,7 +176,11 @@ async function searchRecSongs() {
 
     const territoriesParam = selectedTerritories.length > 0 ? '&territories=' + selectedTerritories.join(',') : ''
 
-    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year) + '&genre=' + encodeURIComponent(genre) + '&bpmMin=' + bpmMin + '&bpmMax=' + bpmMax + territoriesParam)
+    const langCodes = []
+    selectedLanguages.forEach(function(code) { langCodes.push(code) })
+    const languagesParam = langCodes.length > 0 ? '&languages=' + langCodes.join(',') : ''
+
+    const response = await fetch('/rec-songs?key=' + encodeURIComponent(deckAKey) + '&year=' + encodeURIComponent(year) + '&genre=' + encodeURIComponent(genre) + '&bpmMin=' + bpmMin + '&bpmMax=' + bpmMax + territoriesParam + languagesParam)
     const data = await response.json()
 
     if (data.error) {
@@ -512,4 +516,42 @@ function openMapModal() {
 
 function closeMapModal() {
     document.getElementById('mapModal').classList.add('hidden')
+}
+
+function switchModalTab(tab) {
+    const panelRegions   = document.getElementById('panelRegions')
+    const panelLanguages = document.getElementById('panelLanguages')
+    const tabRegions     = document.getElementById('tabRegions')
+    const tabLanguages   = document.getElementById('tabLanguages')
+
+    if (tab === 'regions') {
+        panelRegions.classList.remove('hidden')
+        panelLanguages.classList.add('hidden')
+        tabRegions.classList.add('modal-tab-active')
+        tabLanguages.classList.remove('modal-tab-active')
+        if (regionMap) regionMap.invalidateSize()
+    } else {
+        panelRegions.classList.add('hidden')
+        panelLanguages.classList.remove('hidden')
+        tabRegions.classList.remove('modal-tab-active')
+        tabLanguages.classList.add('modal-tab-active')
+    }
+}
+
+const selectedLanguages = new Set()
+
+function toggleLanguage(code) {
+    if (selectedLanguages.has(code)) {
+        selectedLanguages.delete(code)
+    } else {
+        selectedLanguages.add(code)
+    }
+    const btn = document.getElementById('lang-' + code)
+    if (btn) {
+        if (selectedLanguages.has(code)) {
+            btn.classList.add('lang-pill-active')
+        } else {
+            btn.classList.remove('lang-pill-active')
+        }
+    }
 }

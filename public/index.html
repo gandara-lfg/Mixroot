@@ -229,15 +229,30 @@
             <!-- Header -->
             <div class="flex items-center justify-between px-5 py-3.5 shrink-0"
                 style="background:#0f0d0a;border-bottom:1px solid rgba(255,255,255,0.05)">
-                <div>
-                    <p style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#c8c0b4;letter-spacing:-0.02em">Select Regions</p>
-                    <p style="font-size:9px;color:#48443a;margin-top:3px;font-weight:500;letter-spacing:0.05em">Choose territories to filter harmonic matches by country</p>
+                <div class="flex items-center gap-5">
+                    <button onclick="switchModalTab('regions')" id="tabRegions" class="modal-tab modal-tab-active">Regions</button>
+                    <button onclick="switchModalTab('languages')" id="tabLanguages" class="modal-tab">Languages</button>
                 </div>
                 <button onclick="closeMapModal()" class="map-modal-close">✕</button>
             </div>
-            <!-- Map -->
-            <div class="flex-1 relative overflow-hidden">
+            <!-- Regions panel -->
+            <div id="panelRegions" class="flex-1 relative overflow-hidden">
                 <div id="regionMap" style="position:absolute;inset:0;background:#0a0908"></div>
+            </div>
+            <!-- Languages panel -->
+            <div id="panelLanguages" class="hidden flex-1 flex flex-col gap-4 p-6">
+                <p style="font-size:9px;color:#48443a;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">Filter harmonic matches by lyric language</p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="toggleLanguage('en')" id="lang-en" class="lang-pill">English</button>
+                    <button onclick="toggleLanguage('es')" id="lang-es" class="lang-pill">Spanish</button>
+                    <button onclick="toggleLanguage('pt')" id="lang-pt" class="lang-pill">Portuguese</button>
+                    <button onclick="toggleLanguage('zh')" id="lang-zh" class="lang-pill">Chinese</button>
+                    <button onclick="toggleLanguage('ja')" id="lang-ja" class="lang-pill">Japanese</button>
+                    <button onclick="toggleLanguage('ko')" id="lang-ko" class="lang-pill">Korean</button>
+                    <button onclick="toggleLanguage('fr')" id="lang-fr" class="lang-pill">French</button>
+                    <button onclick="toggleLanguage('de')" id="lang-de" class="lang-pill">German</button>
+                    <button onclick="toggleLanguage('ru')" id="lang-ru" class="lang-pill">Russian</button>
+                </div>
             </div>
         </div>
     </div>
