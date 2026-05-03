@@ -23,7 +23,10 @@
     <!-- ════ HEADER ════ -->
     <header class="controller-header shrink-0 flex items-center justify-between px-8 py-2.5 border-b border-white/[0.05]">
         <span class="wordmark">Mixroot</span>
-        <p class="text-[9px] font-semibold uppercase tracking-[0.25em] text-[#48443c]">DJ Song Matcher</p>
+        <div class="flex items-center gap-5">
+            <button onclick="openChangelogModal()" class="changelog-btn">Changelog</button>
+            <p class="text-[9px] font-semibold uppercase tracking-[0.25em] text-[#48443c]">DJ Song Matcher</p>
+        </div>
     </header>
 
     <!-- ════ CONTROLLER BODY ════ -->
@@ -50,19 +53,57 @@
                 </div>
             </div>
 
-            <!-- Search inputs -->
-            <div class="flex gap-2 w-full shrink-0">
-                <input id="songInput" type="text" placeholder="Song…"
-                    class="search-input flex-1 min-w-0">
-                <input id="artistInput" type="text" placeholder="Artist…"
-                    class="search-input flex-1 min-w-0">
-                <button onclick="searchSong()" class="search-btn">Search</button>
+            <!-- Deck A tabs -->
+            <div class="flex gap-5 self-start shrink-0">
+                <button onclick="switchDeckTab('search')" id="deckTabSearch" class="modal-tab modal-tab-active">Search</button>
+                <button onclick="switchDeckTab('key')" id="deckTabKey" class="modal-tab">Key Picker</button>
             </div>
 
-            <!-- Song info — populated by JS -->
-            <div id="result" class="w-full flex-1 min-h-0">
-                <div class="info-empty h-full">
-                    <p class="info-empty-text">Search for a song to load Deck A</p>
+            <!-- Search panel -->
+            <div id="deckPanelSearch" class="w-full flex flex-col gap-3 flex-1 min-h-0">
+                <div class="flex gap-2 w-full shrink-0">
+                    <input id="songInput" type="text" placeholder="Song…"
+                        class="search-input flex-1 min-w-0">
+                    <input id="artistInput" type="text" placeholder="Artist…"
+                        class="search-input flex-1 min-w-0">
+                    <button onclick="searchSong()" class="search-btn">Search</button>
+                </div>
+                <div id="result" class="w-full flex-1 min-h-0">
+                    <div class="info-empty h-full">
+                        <p class="info-empty-text">Search for a song to load Deck A</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key picker panel -->
+            <div id="deckPanelKey" class="hidden w-full flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto">
+                <div class="grid grid-cols-6 gap-1.5">
+                    <span class="col-span-6 text-[8px] font-bold uppercase tracking-widest pt-1" style="color:#48443a">Major</span>
+                    <button onclick="pickKey('C')"   id="key-C"   class="key-btn">C</button>
+                    <button onclick="pickKey('C#')"  id="key-Cs"  class="key-btn">C#</button>
+                    <button onclick="pickKey('D')"   id="key-D"   class="key-btn">D</button>
+                    <button onclick="pickKey('D#')"  id="key-Ds"  class="key-btn">D#</button>
+                    <button onclick="pickKey('E')"   id="key-E"   class="key-btn">E</button>
+                    <button onclick="pickKey('F')"   id="key-F"   class="key-btn">F</button>
+                    <button onclick="pickKey('F#')"  id="key-Fs"  class="key-btn">F#</button>
+                    <button onclick="pickKey('G')"   id="key-G"   class="key-btn">G</button>
+                    <button onclick="pickKey('G#')"  id="key-Gs"  class="key-btn">G#</button>
+                    <button onclick="pickKey('A')"   id="key-A"   class="key-btn">A</button>
+                    <button onclick="pickKey('A#')"  id="key-As"  class="key-btn">A#</button>
+                    <button onclick="pickKey('B')"   id="key-B"   class="key-btn">B</button>
+                    <span class="col-span-6 text-[8px] font-bold uppercase tracking-widest pt-2" style="color:#48443a">Minor</span>
+                    <button onclick="pickKey('Cm')"  id="key-Cm"  class="key-btn">Cm</button>
+                    <button onclick="pickKey('C#m')" id="key-Csm" class="key-btn">C#m</button>
+                    <button onclick="pickKey('Dm')"  id="key-Dm"  class="key-btn">Dm</button>
+                    <button onclick="pickKey('D#m')" id="key-Dsm" class="key-btn">D#m</button>
+                    <button onclick="pickKey('Em')"  id="key-Em"  class="key-btn">Em</button>
+                    <button onclick="pickKey('Fm')"  id="key-Fm"  class="key-btn">Fm</button>
+                    <button onclick="pickKey('F#m')" id="key-Fsm" class="key-btn">F#m</button>
+                    <button onclick="pickKey('Gm')"  id="key-Gm"  class="key-btn">Gm</button>
+                    <button onclick="pickKey('G#m')" id="key-Gsm" class="key-btn">G#m</button>
+                    <button onclick="pickKey('Am')"  id="key-Am"  class="key-btn">Am</button>
+                    <button onclick="pickKey('A#m')" id="key-Asm" class="key-btn">A#m</button>
+                    <button onclick="pickKey('Bm')"  id="key-Bm"  class="key-btn">Bm</button>
                 </div>
             </div>
 
@@ -252,6 +293,28 @@
                     <button onclick="toggleLanguage('fr')" id="lang-fr" class="lang-pill">French</button>
                     <button onclick="toggleLanguage('de')" id="lang-de" class="lang-pill">German</button>
                     <button onclick="toggleLanguage('ru')" id="lang-ru" class="lang-pill">Russian</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ CHANGELOG MODAL ════ -->
+    <div id="changelogModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0" onclick="closeChangelogModal()"
+            style="background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)"></div>
+        <div class="relative flex flex-col rounded-2xl overflow-hidden"
+            style="width:480px;max-height:70vh;background:#0d0b08;border:1px solid rgba(200,168,100,0.14);box-shadow:0 32px 100px rgba(0,0,0,0.95)">
+            <div class="flex items-center justify-between px-5 py-3.5 shrink-0"
+                style="background:#0f0d0a;border-bottom:1px solid rgba(255,255,255,0.05)">
+                <div>
+                    <p style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#c8c0b4;letter-spacing:-0.02em">Changelog</p>
+                    <p style="font-size:9px;color:#48443a;margin-top:3px;font-weight:500;letter-spacing:0.05em">Recent commits from GitHub</p>
+                </div>
+                <button onclick="closeChangelogModal()" class="map-modal-close">✕</button>
+            </div>
+            <div id="changelogList" class="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-0">
+                <div class="flex items-center justify-center py-8">
+                    <span class="loading loading-spinner loading-md" style="color:#c8a86e"></span>
                 </div>
             </div>
         </div>

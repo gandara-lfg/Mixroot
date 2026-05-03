@@ -1,4 +1,43 @@
-let deckAKey = null
+let deckAKey  = null
+let pickedKey = null
+
+function keyToId(key) {
+    return 'key-' + key.replace('#', 's')
+}
+
+function pickKey(key) {
+    if (pickedKey !== null) {
+        const prev = document.getElementById(keyToId(pickedKey))
+        if (prev) prev.classList.remove('key-btn-active')
+    }
+    if (pickedKey === key) {
+        pickedKey = null
+        deckAKey  = null
+        return
+    }
+    pickedKey = key
+    deckAKey  = key
+    const btn = document.getElementById(keyToId(key))
+    if (btn) btn.classList.add('key-btn-active')
+}
+
+function switchDeckTab(tab) {
+    const panelSearch = document.getElementById('deckPanelSearch')
+    const panelKey    = document.getElementById('deckPanelKey')
+    const tabSearch   = document.getElementById('deckTabSearch')
+    const tabKey      = document.getElementById('deckTabKey')
+    if (tab === 'search') {
+        panelSearch.classList.remove('hidden')
+        panelKey.classList.add('hidden')
+        tabSearch.classList.add('modal-tab-active')
+        tabKey.classList.remove('modal-tab-active')
+    } else {
+        panelSearch.classList.add('hidden')
+        panelKey.classList.remove('hidden')
+        tabSearch.classList.remove('modal-tab-active')
+        tabKey.classList.add('modal-tab-active')
+    }
+}
 
 // Dual-handle BPM range slider
 document.addEventListener('DOMContentLoaded', () => {
@@ -516,6 +555,37 @@ function openMapModal() {
 
 function closeMapModal() {
     document.getElementById('mapModal').classList.add('hidden')
+}
+
+async function openChangelogModal() {
+    document.getElementById('changelogModal').classList.remove('hidden')
+    const list = document.getElementById('changelogList')
+    list.innerHTML = '<div class="flex items-center justify-center py-8"><span class="loading loading-spinner loading-md" style="color:#c8a86e"></span></div>'
+
+    const response = await fetch('https://api.github.com/repos/gandara-lfg/Mixroot/commits?per_page=20')
+    if (!response.ok) {
+        list.innerHTML = '<p style="color:#c0806a;font-size:12px;padding:16px">Could not load commits.</p>'
+        return
+    }
+    const commits = await response.json()
+
+    list.innerHTML = commits.map(function(c) {
+        const msg    = c.commit.message.split('\n')[0]
+        const sha    = c.sha.substring(0, 7)
+        const date   = new Date(c.commit.author.date)
+        const label  = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        return '<a href="' + c.html_url + '" target="_blank" class="commit-item">' +
+            '<span class="commit-msg">' + msg + '</span>' +
+            '<span class="commit-meta">' +
+                '<span class="commit-sha">' + sha + '</span>' +
+                '<span class="commit-date">' + label + '</span>' +
+            '</span>' +
+        '</a>'
+    }).join('')
+}
+
+function closeChangelogModal() {
+    document.getElementById('changelogModal').classList.add('hidden')
 }
 
 function switchModalTab(tab) {
