@@ -39,50 +39,48 @@ function switchDeckTab(tab) {
     }
 }
 
-// Dual-handle BPM range slider
-document.addEventListener('DOMContentLoaded', () => {
-    const minThumb = document.getElementById('bpmRangeMin')
-    const maxThumb = document.getElementById('bpmRangeMax')
-    const minLabel = document.getElementById('bpmMin')
-    const maxLabel = document.getElementById('bpmMax')
-    const fill    = document.getElementById('bpmRangeFill')
-
-    const RANGE_MIN = 60
-    const RANGE_MAX = 220
-    const TOTAL     = RANGE_MAX - RANGE_MIN
+// Dual-handle range slider factory
+function initDualRangeSlider({ minId, maxId, minLabelId, maxLabelId, fillId, rangeMin, rangeMax }) {
+    const minThumb = document.getElementById(minId)
+    const maxThumb = document.getElementById(maxId)
+    const minLabel = document.getElementById(minLabelId)
+    const maxLabel = document.getElementById(maxLabelId)
+    const fill     = document.getElementById(fillId)
+    const TOTAL    = rangeMax - rangeMin
 
     function updateDisplay() {
         let minVal = parseInt(minThumb.value)
         let maxVal = parseInt(maxThumb.value)
 
-        if (minVal > maxVal) {
-            minVal = maxVal
-            minThumb.value = minVal
-        }
-        if (maxVal < minVal) {
-            maxVal = minVal
-            maxThumb.value = maxVal
-        }
+        if (minVal > maxVal) { minVal = maxVal; minThumb.value = minVal }
+        if (maxVal < minVal) { maxVal = minVal; maxThumb.value = maxVal }
 
         minLabel.textContent = minVal
         maxLabel.textContent = maxVal
 
-        const leftPct  = ((minVal - RANGE_MIN) / TOTAL) * 100
-        const rightPct = ((RANGE_MAX - maxVal)  / TOTAL) * 100
-        fill.style.left  = leftPct  + '%'
-        fill.style.right = rightPct + '%'
+        fill.style.left  = ((minVal - rangeMin) / TOTAL * 100) + '%'
+        fill.style.right = ((rangeMax - maxVal)  / TOTAL * 100) + '%'
 
-        if (minVal > (RANGE_MAX + RANGE_MIN) / 2) {
-            minThumb.style.zIndex = 5
-        } else {
-            minThumb.style.zIndex = 3
-        }
+        minThumb.style.zIndex = minVal > (rangeMax + rangeMin) / 2 ? 5 : 3
     }
 
     minThumb.addEventListener('input', updateDisplay)
     maxThumb.addEventListener('input', updateDisplay)
-
     updateDisplay()
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initDualRangeSlider({
+        minId: 'bpmRangeMin', maxId: 'bpmRangeMax',
+        minLabelId: 'bpmMin', maxLabelId: 'bpmMax',
+        fillId: 'bpmRangeFill', rangeMin: 60, rangeMax: 220
+    })
+
+    initDualRangeSlider({
+        minId: 'popRangeMin', maxId: 'popRangeMax',
+        minLabelId: 'popMin', maxLabelId: 'popMax',
+        fillId: 'popRangeFill', rangeMin: 0, rangeMax: 100
+    })
 })
 
 async function searchSong() {
@@ -339,10 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Rock',        value: 'Rock' }
     ]
 
-    const sortOptions = [
-        { label: 'Key Match', value: 'Key Match' },
-    ]
-
     const yearOptions = [
         { label: 'All Years', value: '' },
         { label: '1970s',     value: '1970' },
@@ -354,7 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
 
     initDragKnob('genreKnob', genreOptions, 'genreFilter', 'genreLabel')
-    initDragKnob('sortKnob',  sortOptions,  'sortBy',      'sortLabel')
     initDragKnob('yearKnob',  yearOptions,  'yearFilter',  'yearLabel')
 })
 

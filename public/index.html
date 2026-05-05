@@ -139,21 +139,6 @@
             <!-- Hairline -->
             <div class="w-full h-px bg-white/[0.05]"></div>
 
-            <!-- Sort knob -->
-            <div class="knob-group">
-                <div id="sortKnob" class="mixer-knob">
-                    <div class="knob-notch"></div>
-                </div>
-                <p class="knob-title">Sort By</p>
-                <p id="sortLabel" class="knob-value">Key Match</p>
-                <select id="sortBy" class="hidden">
-                    <option>Key Match</option>
-                </select>
-            </div>
-
-            <!-- Hairline -->
-            <div class="w-full h-px bg-white/[0.05]"></div>
-
             <!-- Release Year knob -->
             <div class="knob-group">
                 <div id="yearKnob" class="mixer-knob">
@@ -191,6 +176,27 @@
                     <input id="bpmRangeMax" type="range" min="60" max="220" value="160" step="5" class="bpm-fader">
                 </div>
                 <p class="knob-title">BPM Range</p>
+            </div>
+
+            <!-- Hairline -->
+            <div class="w-full h-px bg-white/[0.05]"></div>
+
+            <!-- Popularity fader -->
+            <div class="w-full flex flex-col items-center gap-2">
+                <div class="flex justify-between w-full">
+                    <span class="fader-edge-label">0</span>
+                    <span class="fader-center-label">
+                        <span id="popMin">0</span>–<span id="popMax">100</span><span class="fader-unit"> POP</span>
+                    </span>
+                    <span class="fader-edge-label">100</span>
+                </div>
+                <div class="bpm-range-wrap w-full">
+                    <div class="bpm-range-track"></div>
+                    <div id="popRangeFill" class="bpm-range-fill"></div>
+                    <input id="popRangeMin" type="range" min="0" max="100" value="0" step="1" class="bpm-fader">
+                    <input id="popRangeMax" type="range" min="0" max="100" value="100" step="1" class="bpm-fader">
+                </div>
+                <p class="knob-title">Popularity</p>
             </div>
 
             <!-- Hairline -->
